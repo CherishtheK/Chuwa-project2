@@ -1,0 +1,2 @@
+// TODO: submitOnboardingApplication mutation
+export {};
