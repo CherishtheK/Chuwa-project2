@@ -5,6 +5,25 @@ import sendEmails from "../../utils/sendEmail";
 export const resolvers = {
   Query: {
     hello: () => "Hello World!",
+    validateRegistrationToken: async(
+        _parent: any,
+        args: {token: string}
+    ) => {
+        const { token } = args;
+        const curToken = await RegistrationToken.findOne({token});
+        if(!curToken){
+            return({valid: false, email: null});
+        }
+        if(curToken.used){
+            return({valid: false, email: null});
+        }
+        if(curToken.expireAt.getTime() < Date.now()){
+            return({valid: false, email: null});
+        }
+
+        return({valid: true, email: curToken.invitedEmail});
+    }
+
   },
   Mutation: {
     generateRegistrationToken: async(

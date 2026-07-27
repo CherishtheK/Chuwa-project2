@@ -1,6 +1,12 @@
 export const typeDefs = `#graphql
+  type TokenValidationResult {
+    valid: Boolean!
+    email: String
+  }
+
   type Query {
     hello: String
+    validateRegistrationToken(token: String!): TokenValidationResult
   }
 
   input InviteUserInput {
