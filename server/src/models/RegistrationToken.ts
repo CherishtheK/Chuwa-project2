@@ -1,7 +1,7 @@
 import mongoose, { Schema, Document, mongo } from "mongoose";
 
 export interface IRegistration extends Document{
-    name: string,
+    invitedName: string,
     invitedEmail: string,
     expireAt: Date,
     token: string,
@@ -9,7 +9,7 @@ export interface IRegistration extends Document{
 }
 
 const RegistrationTokenSchema = new Schema<IRegistration>({
-    name: {
+    invitedName: {
         type: String,
         required: true,
     },
