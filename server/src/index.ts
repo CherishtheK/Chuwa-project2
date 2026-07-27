@@ -3,6 +3,7 @@ import dotenv from 'dotenv';
 import connectDB from './config/db';
 import cors from 'cors';
 import createApolloMiddleware from './graphql/server'
+import { User } from './models/User'
 
 dotenv.config();
 const app = express();
