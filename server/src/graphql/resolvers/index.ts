@@ -1,6 +1,10 @@
 import generateToken from "../../utils/generateToken";
 import { RegistrationToken } from "../../models/RegistrationToken";
+import { User } from "../../models/User";
 import sendEmails from "../../utils/sendEmail";
+import { Context } from '../../context'
+import { hashPassword, generateJwtToken } from "../../utils/auth";
+
 
 export const resolvers = {
   Query: {
@@ -57,6 +61,88 @@ export const resolvers = {
         }
 
         return ({success: true, message:"Token generated and email sent!"})
+    },
+    register: async(
+        _parent: any,
+        args: {input: {token: string, registerName: string, registerEmail: string, password: string}},
+        context: Context
+    ) => {
+        const {token, registerName, registerEmail, password} = args.input;
+
+        //Verify hr token
+        const curToken = await RegistrationToken.findOne({token});
+        if(!curToken){
+            return ({
+                success: false,
+                message: "Register token does not exist!",
+                token: null,
+                user: null
+            })
+        }
+        if(curToken.used){
+            return ({
+                success: false,
+                message: "Register token has been used!",
+                token: null,
+                user: null
+            })
+        }
+        if(curToken.expireAt.getTime() < Date.now()){
+            return ({
+                success: false,
+                message: "Register token has expired!",
+                token: null,
+                user: null
+            })
+        }
+        if (password.length < 6) {
+            return {
+                success: false,
+                message: 'Password must be at least 6 characters',
+                token: null,
+                user: null
+            };
+        }
+
+        // Check if user exists
+        const existingUser = await User.findOne(
+            {$or: [
+                { userName: registerName },
+                { email: registerEmail}
+            ]}
+        );
+
+        if (existingUser) {
+            return {
+                success: false,
+                message: 'Username or email already exists',
+                token: null,
+                user: null
+            };
+        }
+
+        // Create new user
+        const hashedPassword = await hashPassword(password);
+        const newUser = {
+            userName: registerName,
+            email: registerEmail,
+            passwordHash: hashedPassword,
+            role: 'employee' as const
+        };
+
+        const createdUser = await User.create(newUser);
+
+        curToken.used = true;
+        await curToken.save();
+
+        const jwtToken = generateJwtToken(createdUser);
+
+        return ({
+            success: true,
+            message: "Successfully Registered!",
+            token:  jwtToken,
+            user: createdUser
+        })
     }
 }
 };

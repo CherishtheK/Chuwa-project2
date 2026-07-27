@@ -1,4 +1,5 @@
 import jwt from 'jsonwebtoken';
+import { verifyToken } from './utils/auth';
 
 export interface Context{
     currentUser: any | null,
@@ -16,7 +17,7 @@ async function createContext({req}:{req?: any}):Promise<Context>{
     let currentUser = null;
     if(token){
         try{
-            currentUser = jwt.verify(token, process.env.JWT_SECRET!);
+            currentUser = verifyToken(token);
         }
         catch(err){
             currentUser = null;

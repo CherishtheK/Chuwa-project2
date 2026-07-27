@@ -18,9 +18,30 @@ export const typeDefs = `#graphql
     success: Boolean!, message: String 
   }
 
+  type User {
+    id: ID!
+    userName: String!
+    email: String!
+    role: String!
+  }
+
+  input CreateUserInput {
+    token: String!
+    registerName: String!
+    registerEmail: String!
+    password: String!
+  }
+
+  type AuthResult {
+    success: Boolean!
+    message: String
+    token: String
+    user: User
+  }
 
   type Mutation {
-    generateRegistrationToken(input: InviteUserInput!): RegistrationResult
+    generateRegistrationToken(input: InviteUserInput!): RegistrationResult!
+    register(input: CreateUserInput!): AuthResult!
   }
 `;
 
