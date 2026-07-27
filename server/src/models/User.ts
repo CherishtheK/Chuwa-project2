@@ -2,9 +2,9 @@ import mongoose, { Schema, Document } from 'mongoose';
 
 
 export interface IUser extends Document{
-    userName: string,
-    email: string,
-    passwordHash: string,
+    userName: string;
+    email: string;
+    passwordHash: string;
     role: 'employee' | 'hr'
 }
 
