@@ -2,11 +2,11 @@ import express from 'express';
 import dotenv from 'dotenv';
 import connectDB from './config/db';
 import cors from 'cors';
+dotenv.config();
 import createApolloMiddleware from './graphql/server'
 
 
 
-dotenv.config();
 const app = express();
 const PORT = process.env.PORT || 5000;
 
