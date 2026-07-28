@@ -68,6 +68,8 @@ export const requireAuth = (context: Context) => {
 export const requireRole = (context: Context, role: 'employee' | 'hr') => {
     requireAuth(context);
 
+    if (!context.currentUser) throw new Error("Not Authenticated!"); 
+
     if(context.currentUser.role !== role){
         throw new Error("No Authorization!");
     }
@@ -75,6 +77,9 @@ export const requireRole = (context: Context, role: 'employee' | 'hr') => {
 
 export const requireOwnership = (context: Context, owner: Types.ObjectId) => {
     requireAuth(context);
+
+    if (!context.currentUser) throw new Error("Not Authenticated!"); 
+
     if(context.currentUser.role === 'hr'){
         return;
     }

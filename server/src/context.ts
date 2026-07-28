@@ -1,8 +1,9 @@
 import jwt from 'jsonwebtoken';
-import { verifyToken } from './utils/auth';
+import { verifyToken, JWTPayload } from './utils/auth';
+
 
 export interface Context{
-    currentUser: any | null,
+    currentUser: JWTPayload | null,
     token?: string | undefined    
 }
 
