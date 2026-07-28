@@ -2,8 +2,9 @@ import multer from "multer";
 import path from "node:path";
 import crypto from "node:crypto";
 import fs from "node:fs";
+import { Request, Response, NextFunction } from "express";
 
-const uploadDir = path.resolve(__dirname, "../../uploads");
+export const uploadDir = path.resolve(__dirname, "../../uploads");
 fs.mkdirSync(uploadDir, { recursive: true });
 
 const storage = multer.diskStorage({
@@ -14,7 +15,7 @@ const storage = multer.diskStorage({
   },
 });
 
-export const upload = multer({
+const upload = multer({
   storage,
   limits: { fileSize: 10 * 1024 * 1024 },
   fileFilter: (_req, file, cb) => {
@@ -27,3 +28,19 @@ export const upload = multer({
     }
   },
 });
+
+export function uploadSingleFile(
+  req: Request,
+  res: Response,
+  next: NextFunction,
+) {
+  upload.single("file")(req, res, (err) => {
+    if (err instanceof multer.MulterError) {
+      return res.status(400).json({ error: err.message });
+    }
+    if (err) {
+      return res.status(400).json({ error: err.message });
+    }
+    next();
+  });
+}

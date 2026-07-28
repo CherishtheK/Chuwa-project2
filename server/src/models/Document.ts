@@ -1,6 +1,6 @@
 import mongoose, { Schema, Document, Types } from "mongoose";
 
-const DOC_TYPES = [
+export const DOC_TYPES = [
   "PROFILE_PICTURE",
   "DRIVERS_LICENSE",
   "WORK_AUTHORIZATION",

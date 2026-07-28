@@ -1,12 +1,12 @@
 import { Router } from "express";
 import { requireAuth } from "../middleware/requireAuth";
-import { upload } from "./multer";
-import * as ctrl from "./document.controller";
+import { uploadSingleFile } from "./multer";
+import * as docCtrl from "./documentController";
 
 const router = Router();
 
-router.post("/upload", requireAuth, upload.single("file"), ctrl.uploadDocument);
-router.get("/files/:id", requireAuth, ctrl.serveFile);
-router.get("/templates/:name", requireAuth, ctrl.downloadTemplate);
+router.post("/upload", requireAuth, uploadSingleFile, docCtrl.uploadDocument);
+router.get("/files/:id", requireAuth, docCtrl.presentFile);
+router.get("/templates/:name", requireAuth, docCtrl.downloadTemplate);
 
 export default router;

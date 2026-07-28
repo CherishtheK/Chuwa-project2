@@ -1,4 +1,5 @@
-import express from "express";
+import "./types/express";
+import express, { Request, Response, NextFunction } from "express";
 import dotenv from "dotenv";
 import connectDB from "./config/db";
 import cors from "cors";
@@ -20,6 +21,12 @@ async function startServer() {
   app.use("/api", restRouter);
 
   app.get("/", (req, res) => res.send("Server is running"));
+
+  // 处理全局错误
+  app.use((err: Error, req: Request, res: Response, next: NextFunction) => {
+    console.error(err);
+    res.status(500).json({ error: "Internal server error" });
+  });
 
   app.listen(PORT, () => console.log(`Server running on port ${PORT}`));
 }
