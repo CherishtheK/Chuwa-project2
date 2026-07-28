@@ -1,6 +1,8 @@
 import bcrypt from 'bcryptjs';
 import jwt from 'jsonwebtoken';
 import { User, IUser } from '../models/User';
+import { Context } from '../context';
+import { Types } from 'mongoose';
 
 const JWT_SECRET = process.env.JWT_SECRET
 if (!JWT_SECRET) {
@@ -58,3 +60,26 @@ export const verifyToken = (token: string): JWTPayload => {
     throw new Error('Invalid or expired token');
   }
 };
+
+export const requireAuth = (context: Context) => {
+    if(!context.currentUser) throw new Error("Not Authenticated!");
+}
+
+export const requireRole = (context: Context, role: 'employee' | 'hr') => {
+    requireAuth(context);
+
+    if(context.currentUser.role !== role){
+        throw new Error("No Authorization!");
+    }
+}
+
+export const requireOwnership = (context: Context, owner: Types.ObjectId) => {
+    requireAuth(context);
+    if(context.currentUser.role === 'hr'){
+        return;
+    }
+
+    if(context.currentUser.userId !== owner.toString()){
+        throw new Error("No Authorization!")
+    }
+}
