@@ -4,6 +4,7 @@ import { User } from "../../models/User";
 import sendEmails from "../../utils/sendEmail";
 import { Context } from '../../context'
 import { hashPassword, generateJwtToken, comparePassword } from "../../utils/auth";
+import { isContext } from "node:vm";
 
 
 export const resolvers = {
@@ -26,6 +27,21 @@ export const resolvers = {
         }
 
         return({valid: true, email: curToken.invitedEmail});
+    },
+    me: async(
+        _parent: any,
+        _args: any,
+        contex: Context
+    ) => {
+        if(!contex.currentUser){
+            throw new Error("Not Authenticated!")
+        }
+        const curUser = await User.findById(contex.currentUser.userId);
+        if(!curUser){
+            throw new Error("Not Authenticated!")
+        }
+        return curUser;
+
     }
 
   },
@@ -65,7 +81,7 @@ export const resolvers = {
     register: async(
         _parent: any,
         args: {input: {token: string, registerName: string, registerEmail: string, password: string}},
-        context: Context
+        _context: Context
     ) => {
         const {token, registerName, registerEmail, password} = args.input;
 
@@ -147,7 +163,7 @@ export const resolvers = {
     login: async(
         _parent:any,
         args: {input: {loginName: string, loginPassword: string}},
-        contex: Context
+        _contex: Context
     ) => {
         const { loginName, loginPassword } = args.input;
         try{
