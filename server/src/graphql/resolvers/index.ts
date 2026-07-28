@@ -3,7 +3,7 @@ import { RegistrationToken } from "../../models/RegistrationToken";
 import { User } from "../../models/User";
 import sendEmails from "../../utils/sendEmail";
 import { Context } from '../../context'
-import { hashPassword, generateJwtToken } from "../../utils/auth";
+import { hashPassword, generateJwtToken, comparePassword } from "../../utils/auth";
 
 
 export const resolvers = {
@@ -143,6 +143,48 @@ export const resolvers = {
             token:  jwtToken,
             user: createdUser
         })
+    },
+    login: async(
+        _parent:any,
+        args: {input: {loginName: string, loginPassword: string}},
+        contex: Context
+    ) => {
+        const { loginName, loginPassword } = args.input;
+        try{
+            const curUser = await User.findOne({userName: loginName})
+            if(!curUser){
+                return({
+                    success: false,
+                    message: "Invalid username or password!",
+                    token:  null,
+                    user: null
+                })
+            }
+            const validPassword = await comparePassword(loginPassword, curUser.passwordHash);
+            if(!validPassword){
+                return({
+                    success: false,
+                    message: "Invalid username or password!",
+                    token:  null,
+                    user: null
+                })
+            }
+            const jwtToken = generateJwtToken(curUser);
+            return ({
+                success: true,
+                message: "Successfully Logged in!",
+                token:  jwtToken,
+                user: curUser
+            })
+        }
+        catch(err){
+            return({
+                success: false,
+                message: (err as Error).message,
+                token: null,
+                user: null           
+            })
+        }
     }
 }
 };
