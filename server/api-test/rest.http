@@ -1,0 +1,121 @@
+# ------------------------------------------------------------------
+# server/api-tests/rest.http  —— REST 接口手动测试（VS Code REST Client）
+#
+# 前置：
+#   1. 装 VS Code 扩展 "REST Client"（作者 huachao）
+#   2. 服务已启动（npm run dev），端口 5000
+#   3. 数据库里已存在测试用户（login 只能登已注册用户）：
+#        - testuser  / secret123        （普通员工，主测试用）
+#        - testuser2 / secret123         （第二个员工，测 403 用）
+#      若库是空的，先用 register 流程各建一次；之后重复测试都走 login。
+#      （也可用队友 seed 的 HR 账号登录，顺便测 "HR 能看别人文档"。）
+#
+# 用法：点每个请求上方的 "Send Request"，按顺序 登录 → 上传 → … 跑。
+# ------------------------------------------------------------------
+
+@baseUrl = http://localhost:5000
+
+# ============ 0. 登录 → 拿 JWT（全自动）============
+# @name login
+POST {{baseUrl}}/graphql
+Content-Type: application/json
+
+{
+  "query": "mutation($input: LoginInput!){ login(input:$input){ success message token user{ id userName role } } }",
+  "variables": { "input": { "loginName": "testuser44", "loginPassword": "test123" } }
+}
+
+### ↓ 从上一步响应自动抓 JWT，后面接口都用它
+@authToken = {{login.response.body.$.data.login.token}}
+
+
+# ============ 1. 上传文件（POST /api/upload）============
+# @name upload
+# 复用 server/templates 里的空白 PDF 当素材，无需另找文件
+POST {{baseUrl}}/api/upload
+Authorization: Bearer {{authToken}}
+Content-Type: multipart/form-data; boundary=RestBoundary
+
+--RestBoundary
+Content-Disposition: form-data; name="type"
+
+DRIVERS_LICENSE
+--RestBoundary
+Content-Disposition: form-data; name="file"; filename="sample.pdf"
+Content-Type: application/pdf
+
+< ../templates/i983-empty.pdf
+--RestBoundary--
+
+### ↓ 自动抓返回的文档 id，供接口 2 用
+@docId = {{upload.response.body.$.id}}
+
+
+### ============ 2. 预览（GET /api/files/:id）============
+GET {{baseUrl}}/api/files/{{docId}}
+Authorization: Bearer {{authToken}}
+
+### ============ 2b. 下载（?download=1）============
+GET {{baseUrl}}/api/files/{{docId}}?download=1
+Authorization: Bearer {{authToken}}
+
+### ============ 3. 下载模板（注意名字带 .pdf）============
+GET {{baseUrl}}/api/templates/i983-empty.pdf
+Authorization: Bearer {{authToken}}
+
+
+# ==================================================================
+#  反面用例（评分点，务必测）
+# ==================================================================
+
+# 4a. 没登录 → 期望 401
+GET {{baseUrl}}/api/files/{{docId}}
+
+### 4b. 非法文档类型 → 期望 400（且服务器把落盘文件删掉）
+POST {{baseUrl}}/api/upload
+Authorization: Bearer {{authToken}}
+Content-Type: multipart/form-data; boundary=RestBoundary
+
+--RestBoundary
+Content-Disposition: form-data; name="type"
+
+WRONG_TYPE
+--RestBoundary
+Content-Disposition: form-data; name="file"; filename="sample.pdf"
+Content-Type: application/pdf
+
+< ../templates/i983-empty.pdf
+--RestBoundary--
+
+### 4c. 不存在的文档 id（合法格式但查不到）→ 期望 404
+GET {{baseUrl}}/api/files/000000000000000000000000
+Authorization: Bearer {{authToken}}
+
+### 4d. 非法 id 格式 → 期望 404（验证 isValidObjectId，不是 500）
+GET {{baseUrl}}/api/files/not-a-real-id
+Authorization: Bearer {{authToken}}
+
+### 4e. 未知模板名 → 期望 404
+GET {{baseUrl}}/api/templates/anything-else.pdf
+Authorization: Bearer {{authToken}}
+
+
+# ==================================================================
+#  ⭐ 5. 403：看别人的文档（spec 硬性要求）
+#  用第二个员工 testuser2 登录，去访问 testuser 上传的 docId → 应被拒
+# ==================================================================
+# @name login2
+POST {{baseUrl}}/graphql
+Content-Type: application/json
+
+{
+  "query": "mutation($input: LoginInput!){ login(input:$input){ token } }",
+  "variables": { "input": { "loginName": "testuser2", "loginPassword": "secret123" } }
+}
+
+###
+@authToken2 = {{login2.response.body.$.data.login.token}}
+
+### ⭐ 用户2 访问 用户1 的文档 → 期望 403
+GET {{baseUrl}}/api/files/{{docId}}
+Authorization: Bearer {{authToken2}}
