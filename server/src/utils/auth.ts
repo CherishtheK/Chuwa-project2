@@ -1,15 +1,14 @@
-import bcrypt from 'bcryptjs';
-import jwt from 'jsonwebtoken';
-import { User, IUser } from '../models/User';
-import { Context } from '../context';
-import { Types } from 'mongoose';
+import bcrypt from "bcryptjs";
+import jwt from "jsonwebtoken";
+import { User, IUser } from "../models/User";
+import { Context } from "../context";
+import { Types } from "mongoose";
 
-const JWT_SECRET = process.env.JWT_SECRET
+const JWT_SECRET = process.env.JWT_SECRET;
 if (!JWT_SECRET) {
-  throw new Error('JWT_SECRET is not defined in environment variables');
+  throw new Error("JWT_SECRET is not defined in environment variables");
 }
-const JWT_EXPIRES_IN = '7d';
-
+const JWT_EXPIRES_IN = "7d";
 
 export interface JWTPayload {
   userId: string;
@@ -30,7 +29,7 @@ export const hashPassword = async (password: string): Promise<string> => {
  */
 export const comparePassword = async (
   password: string,
-  hashedPassword: string
+  hashedPassword: string,
 ): Promise<boolean> => {
   return bcrypt.compare(password, hashedPassword);
 };
@@ -57,34 +56,35 @@ export const verifyToken = (token: string): JWTPayload => {
   try {
     return jwt.verify(token, JWT_SECRET) as JWTPayload;
   } catch (error) {
-    throw new Error('Invalid or expired token');
+    throw new Error("Invalid or expired token");
   }
 };
 
 export const requireAuth = (context: Context) => {
-    if(!context.currentUser) throw new Error("Not Authenticated!");
-}
+  if (!context.currentUser) throw new Error("Not Authenticated!");
+  return context.currentUser;
+};
 
-export const requireRole = (context: Context, role: 'employee' | 'hr') => {
-    requireAuth(context);
+export const requireRole = (context: Context, role: "employee" | "hr") => {
+  requireAuth(context);
 
-    if (!context.currentUser) throw new Error("Not Authenticated!"); 
+  if (!context.currentUser) throw new Error("Not Authenticated!");
 
-    if(context.currentUser.role !== role){
-        throw new Error("No Authorization!");
-    }
-}
+  if (context.currentUser.role !== role) {
+    throw new Error("No Authorization!");
+  }
+};
 
 export const requireOwnership = (context: Context, owner: Types.ObjectId) => {
-    requireAuth(context);
+  requireAuth(context);
 
-    if (!context.currentUser) throw new Error("Not Authenticated!"); 
+  if (!context.currentUser) throw new Error("Not Authenticated!");
 
-    if(context.currentUser.role === 'hr'){
-        return;
-    }
+  if (context.currentUser.role === "hr") {
+    return;
+  }
 
-    if(context.currentUser.userId !== owner.toString()){
-        throw new Error("No Authorization!")
-    }
-}
+  if (context.currentUser.userId !== owner.toString()) {
+    throw new Error("No Authorization!");
+  }
+};
