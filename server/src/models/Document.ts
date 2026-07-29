@@ -18,6 +18,8 @@ export interface IDocument extends Document {
   feedback?: string;
   mimeType: string;
   fileSize: number;
+  createdAt: Date;
+  updatedAt: Date;
 }
 
 const documentSchema = new Schema<IDocument>(
