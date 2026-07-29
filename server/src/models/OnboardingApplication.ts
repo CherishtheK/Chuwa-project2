@@ -1,12 +1,12 @@
 import mongoose, { Schema, Document, Types } from 'mongoose';
 
-const GENDER_TYPES = [
+export const GENDER_TYPES = [
   "MALE",
   "FEMALE",
   "NO_ANSWER",
 ] as const;
 
-const VISA_TYPES = [
+export const VISA_TYPES = [
   "H1B",
   "L2",
   "F1_CPT_OPT",
@@ -15,7 +15,7 @@ const VISA_TYPES = [
 ] as const;
 
 
-interface IContactPerson{
+export interface IContactPerson{
     firstName: string;
     lastName: string;
     middleName?: string;
