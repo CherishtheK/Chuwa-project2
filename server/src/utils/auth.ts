@@ -63,6 +63,7 @@ export const verifyToken = (token: string): JWTPayload => {
 
 export const requireAuth = (context: Context) => {
     if(!context.currentUser) throw new Error("Not Authenticated!");
+    return context.currentUser;
 }
 
 export const requireRole = (context: Context, role: 'employee' | 'hr') => {

@@ -3,8 +3,14 @@ import { RegistrationToken } from "../../models/RegistrationToken";
 import { User } from "../../models/User";
 import sendEmails from "../../utils/sendEmail";
 import { Context } from '../../context'
-import { hashPassword, generateJwtToken, comparePassword } from "../../utils/auth";
-import { isContext } from "node:vm";
+import { hashPassword, 
+    generateJwtToken, 
+    comparePassword, 
+    requireAuth, 
+    requireRole,
+    requireOwnership 
+} from "../../utils/auth";
+import { OnboardingApplication } from "../../models/OnboardingApplication";
 
 
 export const resolvers = {
@@ -42,6 +48,18 @@ export const resolvers = {
         }
         return curUser;
 
+    },
+    myOnboardingApplication: async(
+        _parent: any,
+        _args: any,
+        context: Context
+    ) => {
+        const currentUser = requireAuth(context);
+        const curApplication = await OnboardingApplication.findOne({
+            owner: currentUser.userId
+        })
+        if(!curApplication) return null;
+        return curApplication;
     }
 
   },

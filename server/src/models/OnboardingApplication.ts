@@ -64,6 +64,7 @@ export interface IOnboardingApplication extends Document{
     driversLicense?: Types.ObjectId;
     reference: IContactPerson;
     emergencyContact: IContactPerson[];
+    feedback?: string;
 }
 
 const OnboardingApplicationSchema = new Schema<IOnboardingApplication> ({
@@ -144,6 +145,9 @@ const OnboardingApplicationSchema = new Schema<IOnboardingApplication> ({
     emergencyContact: {
         type:[ContactPersonSchema],
         required: true
+    },
+    feedback: {
+      type: String,
     }
 
 },
