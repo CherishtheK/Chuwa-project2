@@ -2,6 +2,7 @@ import { Request, Response } from "express";
 import path from "node:path";
 import fs from "node:fs";
 import { DocumentModel, DOC_TYPES } from "../models/Document";
+import { OPT_STEPS, computeVisaStatus } from "../services/visaStatus";
 import { uploadDir } from "./multer";
 import mongoose from "mongoose";
 
@@ -20,6 +21,17 @@ export async function uploadDocument(req: Request, res: Response) {
   if (!DOC_TYPES.includes(type)) {
     fs.rmSync(path.join(uploadDir, file.filename), { force: true });
     return res.status(400).json({ error: "Invalid document type" });
+  }
+  if (OPT_STEPS.includes(type)) {
+    const docs = await DocumentModel.find({ owner: user.userId });
+
+    const { uploadableType } = computeVisaStatus(docs);
+    if (uploadableType !== type) {
+      fs.rmSync(path.join(uploadDir, file.filename), { force: true });
+      return res
+        .status(400)
+        .json({ error: "You cannot upload this document yet" });
+    }
   }
 
   let doc;

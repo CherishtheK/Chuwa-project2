@@ -119,3 +119,35 @@ Content-Type: application/json
 ### ⭐ 用户2 访问 用户1 的文档 → 期望 403
 GET {{baseUrl}}/api/files/{{docId}}
 Authorization: Bearer {{authToken2}}
+
+### 顺序校验：跳步上传 I983 → 期望 400 "You cannot upload this document yet"
+POST {{baseUrl}}/api/upload
+Authorization: Bearer {{authToken}}
+Content-Type: multipart/form-data; boundary=RestBoundary
+
+--RestBoundary
+Content-Disposition: form-data; name="type"
+
+I983
+--RestBoundary
+Content-Disposition: form-data; name="file"; filename="sample.pdf"
+Content-Type: application/pdf
+
+< ../templates/i983-empty.pdf
+--RestBoundary--
+
+### 顺序校验：上传 OPT_RECEIPT → 期望 201（第一步，允许）
+POST {{baseUrl}}/api/upload
+Authorization: Bearer {{authToken}}
+Content-Type: multipart/form-data; boundary=RestBoundary
+
+--RestBoundary
+Content-Disposition: form-data; name="type"
+
+OPT_RECEIPT
+--RestBoundary
+Content-Disposition: form-data; name="file"; filename="receipt.pdf"
+Content-Type: application/pdf
+
+< ../templates/i983-empty.pdf
+--RestBoundary--
