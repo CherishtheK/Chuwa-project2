@@ -5,7 +5,6 @@ import { computeVisaStatus } from "../../services/visaStatus";
 import sendEmails from "../../utils/sendEmail";
 import { Context } from "../../context";
 import { requireAuth, requireRole } from "../../utils/auth";
-import mongoose from "mongoose";
 
 function toVisaDocument(d: IDocument) {
   return {
@@ -57,12 +56,16 @@ export const visaResolvers = {
       context: Context,
     ) => {
       requireRole(context, "hr");
+
       const { documentId, decision, feedback } = args;
+
       if (decision === "REJECT" && !feedback) {
         return { success: false, message: "Feedback is required to reject" };
       }
       const doc = await DocumentModel.findById(documentId);
-      if (!doc) throw new Error("Document not found");
+      if (!doc) {
+        return { success: false, message: "Document not found" };
+      }
       if (doc.status !== "PENDING") {
         return {
           success: false,
@@ -70,12 +73,13 @@ export const visaResolvers = {
         };
       }
       doc.status = decision === "APPROVE" ? "APPROVED" : "REJECTED";
-      if (decision === "REJECT") {
-        doc.feedback = feedback!;
-      } else {
-        delete doc.feedback;
-      }
 
+      if (decision === "REJECT") {
+        doc.feedback = feedback!.trim();
+      } else {
+        doc.set("feedback", undefined);
+      }
+      await doc.save();
       return { success: true, document: toVisaDocument(doc) };
     },
 
