@@ -1,4 +1,5 @@
-export const typeDefs = `#graphql
+import { visaTypeDefs } from "./visa";
+const authTypeDefs = `#graphql
   type TokenValidationResult {
     valid: Boolean!
     email: String
@@ -51,4 +52,4 @@ export const typeDefs = `#graphql
     login(input: LoginInput): AuthResult!
   }
 `;
-
+export const typeDefs = [authTypeDefs, visaTypeDefs];
