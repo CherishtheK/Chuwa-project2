@@ -7,9 +7,43 @@ import {
   hashPassword,
   generateJwtToken,
   comparePassword,
+  requireAuth,
+  requireRole,
+  requireOwnership,
 } from "../../utils/auth";
-import { isContext } from "node:vm";
+import { OnboardingApplication, IContactPerson, GENDER_TYPES, VISA_TYPES} from "../../models/OnboardingApplication";
 import { visaResolvers } from "./visa";
+
+interface SubmitOnboardingInput {
+  firstName: string;
+  lastName: string;
+  middleName?: string;
+  preferredName?: string;
+  profilePicture?: string;    
+  address: {
+    apt?: string;
+    street: string;
+    city: string;
+    state: string;
+    zip: string;
+  };
+  cellPhone: string;
+  workPhone?: string;
+  onboardEmail: string;
+  ssn: string;
+  dob: string;                   
+  gender: (typeof GENDER_TYPES)[number];
+  isPermanent: boolean;
+  citizenshipType?: "GREEN_CARD" | "CITIZEN";
+  workAuth?: (typeof VISA_TYPES)[number];
+  otherVisaTitle?: string;
+  workAuthDoc?: string;
+  visaStartDate?: string;
+  visaEndDate?: string;
+  driversLicense?: string;
+  reference: IContactPerson;
+  emergencyContact: IContactPerson[];
+}
 
 const authResolvers = {
   Query: {
@@ -41,6 +75,18 @@ const authResolvers = {
         throw new Error("Not Authenticated!");
       }
       return curUser;
+    },
+    myOnboardingApplication: async (
+      _parent: any,
+      _args: any,
+      context: Context,
+    ) => {
+      const currentUser = requireAuth(context);
+      const curApplication = await OnboardingApplication.findOne({
+        owner: currentUser.userId,
+      });
+      if (!curApplication) return null;
+      return curApplication;
     },
   },
   Mutation: {
@@ -205,6 +251,127 @@ const authResolvers = {
         };
       }
     },
+    submitOnboardingApplication: async(
+        _parent: any,
+        args: { input: SubmitOnboardingInput },
+        context: Context
+    ) => {
+        const currentUser = requireAuth(context);
+        const {
+            firstName,
+            lastName,
+            middleName,
+            preferredName,
+            profilePicture,
+            address,
+            cellPhone,
+            workPhone,
+            onboardEmail,
+            ssn,
+            dob,
+            gender,
+            isPermanent,
+            citizenshipType,
+            workAuth,
+            otherVisaTitle,
+            workAuthDoc,
+            visaStartDate,
+            visaEndDate,
+            driversLicense,
+            reference,
+            emergencyContact,
+        } = args.input;
+        if (isPermanent === false && !workAuth) {
+            return { 
+                success: false, 
+                message: "Please choose your work authorization", 
+                application: null 
+            };
+        }
+        if (isPermanent === true && !citizenshipType) {
+            return { 
+                success: false, 
+                message: "Please choose your citizenship type", 
+                application: null 
+            };
+        }
+        if (workAuth === 'F1_CPT_OPT' && !workAuthDoc) {
+            return { 
+                success: false, 
+                message: "Please upload work authorization document", 
+                application: null 
+            };
+        }
+        if (workAuth === 'OTHER' && !otherVisaTitle) {
+            return { 
+                success: false, 
+                message: "Please choose your visa title", 
+                application: null 
+            };
+        }
+
+        try{
+            const existingApplication = await OnboardingApplication.findOne({ owner: currentUser.userId });
+            if(existingApplication && existingApplication.status !== "REJECTED"){
+                return {
+                    success: false,
+                    message: "You already have an application in progress.",
+                    application: null,
+                };
+            }
+
+            const applicationData = {
+            owner: currentUser.userId,
+            status: "PENDING" as const,
+            firstName,
+            lastName,
+            ...(middleName !== undefined && { middleName }),
+            ...(preferredName !== undefined && { preferredName }),
+            ...(profilePicture !== undefined && { profilePicture }),
+            address,
+            cellPhone,
+            ...(workPhone !== undefined && { workPhone }),
+            onboardEmail,
+            ssn,
+            dob: new Date(dob),
+            gender,
+            isPermanent,
+            ...(citizenshipType !== undefined && { citizenshipType }),
+            ...(workAuth !== undefined && { workAuth }),
+            ...(otherVisaTitle !== undefined && { otherVisaTitle }),
+            ...(workAuthDoc !== undefined && { workAuthDoc }),
+            ...(visaStartDate !== undefined && { visaStartDate: new Date(visaStartDate) }),
+            ...(visaEndDate !== undefined && { visaEndDate: new Date(visaEndDate) }),
+            ...(driversLicense !== undefined && { driversLicense }),
+            reference,
+            emergencyContact,
+            };
+
+            let savedApplication;
+            if(existingApplication){
+                Object.assign(existingApplication, applicationData);
+                existingApplication.feedback = "";
+                savedApplication = await existingApplication.save();
+            }
+            else{
+                savedApplication = await OnboardingApplication.create(applicationData)
+            }
+
+            return {
+                success: true,
+                message: "Application submitted successfully!",
+                application: savedApplication,
+            };
+
+        }
+        catch(err){
+            return {
+                success: false,
+                message: (err as Error).message,
+                application: null,
+            };
+        }
+    }
   },
 };
 export const resolvers = [authResolvers, visaResolvers];
