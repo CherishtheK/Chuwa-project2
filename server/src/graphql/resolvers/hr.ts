@@ -148,6 +148,7 @@ export const hrResolvers = {
         id: String(t._id),
         invitedName: t.invitedName,
         invitedEmail: t.invitedEmail,
+        link: `${process.env.FRONTEND_URL ?? "http://localhost:5173"}/register?token=${t.token}`,
         expireAt: t.expireAt.toISOString(),
         used: t.used,
         applicationSubmitted: submittedEmails.has(t.invitedEmail.toLowerCase()),
