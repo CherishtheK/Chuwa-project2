@@ -1,4 +1,5 @@
 import { visaTypeDefs } from "./visa";
+import { hrTypeDefs } from "./hr";
 const authTypeDefs = `#graphql
   type TokenValidationResult {
     valid: Boolean!
@@ -174,4 +175,4 @@ const authTypeDefs = `#graphql
 
   
 `;
-export const typeDefs = [authTypeDefs, visaTypeDefs];
+export const typeDefs = [authTypeDefs, visaTypeDefs, hrTypeDefs];
