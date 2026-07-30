@@ -1,5 +1,6 @@
 import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
 import ProtectedRoute from "./components/ProtectedRoute";
+import AppLayout from "./components/layout/AppLayout";
 
 import LoginPage from "./features/auth/LoginPage";
 import RegistrationPage from "./features/auth/RegistrationPage";
@@ -23,54 +24,31 @@ export default function App() {
         <Route path="/register" element={<RegistrationPage />} />
 
         <Route
-          path="/"
           element={
             <ProtectedRoute role="employee">
-              <EmployeeHomePage />
+              <AppLayout role="employee" />
             </ProtectedRoute>
           }
-        />
-        <Route
-          path="/onboarding"
-          element={
-            <ProtectedRoute role="employee">
-              <OnboardingApplicationPage />
-            </ProtectedRoute>
-          }
-        />
-        <Route
-          path="/personal-info"
-          element={
-            <ProtectedRoute role="employee">
-              <PersonalInformationPage />
-            </ProtectedRoute>
-          }
-        />
-        <Route
-          path="/visa-status"
-          element={
-            <ProtectedRoute role="employee">
-              <EmployeeVisaStatusPage />
-            </ProtectedRoute>
-          }
-        />
+        >
+          <Route path="/" element={<EmployeeHomePage />} />
+          <Route path="/onboarding" element={<OnboardingApplicationPage />} />
+          <Route path="/personal-info" element={<PersonalInformationPage />} />
+          <Route path="/visa-status" element={<EmployeeVisaStatusPage />} />
+        </Route>
 
         <Route
-          path="/hr"
           element={
             <ProtectedRoute role="hr">
-              <HRHomePage />
+              <AppLayout role="hr" />
             </ProtectedRoute>
           }
-        />
-        <Route
-          path="/hr/employees"
-          element={
-            <ProtectedRoute role="hr">
-              <EmployeeProfilesPage />
-            </ProtectedRoute>
-          }
-        />
+        >
+          <Route path="/hr" element={<HRHomePage />} />
+          <Route path="/hr/employees" element={<EmployeeProfilesPage />} />
+          <Route path="/hr/hiring" element={<HiringManagementPage />} />
+          <Route path="/hr/visa" element={<HRVisaStatusPage />} />
+        </Route>
+
         <Route
           path="/hr/employees/:userId"
           element={
@@ -80,26 +58,10 @@ export default function App() {
           }
         />
         <Route
-          path="/hr/hiring"
-          element={
-            <ProtectedRoute role="hr">
-              <HiringManagementPage />
-            </ProtectedRoute>
-          }
-        />
-        <Route
           path="/hr/applications/:userId"
           element={
             <ProtectedRoute role="hr">
               <ApplicationReviewPage />
-            </ProtectedRoute>
-          }
-        />
-        <Route
-          path="/hr/visa"
-          element={
-            <ProtectedRoute role="hr">
-              <HRVisaStatusPage />
             </ProtectedRoute>
           }
         />

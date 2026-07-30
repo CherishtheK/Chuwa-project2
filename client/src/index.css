@@ -1,9 +1,18 @@
 @import "tailwindcss";
 
 @theme {
-  --color-primary: #2f66d6; /* Meridian 主蓝 */
+  --color-primary: #2f66d6; /* 主题蓝色 */
   --color-sidebar: #1a2233; /* 深色侧栏 */
   --color-page: #f2f4f8; /* 页面底色 */
   --color-success: #1f9d6b; /* 绿 */
   --color-danger: #d1495b; /* 红 */
+}
+
+@layer base {
+  h1 {
+    @apply text-2xl font-bold text-gray-900;
+  }
+  h2 {
+    @apply text-lg font-bold;
+  }
 }
