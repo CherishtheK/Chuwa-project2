@@ -19,6 +19,7 @@ import {
 } from "../../models/OnboardingApplication";
 import { visaResolvers } from "./visa";
 import { hrResolvers } from "./hr";
+import { Types } from "mongoose";
 
 interface SubmitOnboardingInput {
   firstName: string;
@@ -94,6 +95,16 @@ const authResolvers = {
       if (!curApplication) return null;
       return curApplication;
     },
+    myPersonalInfo: async(
+        _parent: any,
+        _args: any, 
+        context: Context
+    ) => {
+        const currentUser = requireAuth(context);
+        const userApplication = await OnboardingApplication.findOne({owner: currentUser.userId});
+        if(!userApplication || userApplication.status !== 'APPROVED') return null;
+        return userApplication;
+    }
   },
   Mutation: {
     generateRegistrationToken: async (
@@ -263,6 +274,16 @@ const authResolvers = {
       context: Context,
     ) => {
       const currentUser = requireAuth(context);
+      const userInfo = await User.findById(currentUser.userId);
+      if (!userInfo) {
+        return {
+            success: false,
+            message: "User not found",
+            application: null,
+        };
+    }
+
+    const onboardEmail = userInfo.email;
       const {
         firstName,
         lastName,
@@ -272,7 +293,7 @@ const authResolvers = {
         address,
         cellPhone,
         workPhone,
-        onboardEmail,
+        // onboardEmail,
         ssn,
         dob,
         gender,
@@ -381,6 +402,181 @@ const authResolvers = {
           application: null,
         };
       }
+    },
+    updateAddressSection: async(
+        _parent: any,
+        args: {
+            input: {
+                apt?: string;
+                street: string;
+                city: string;
+                state: string;
+                zip: string;
+            }
+        },
+        context: Context
+    ) => {
+        const currentUser = requireAuth(context);
+        const application = await OnboardingApplication.findOne({owner: currentUser.userId});
+        if(!application || application.status !== 'APPROVED'){
+            return {
+                success: false,
+                message: "You can only edit personal information after your application is approved.",
+                application: null,
+            };
+        }
+
+        try{
+            application.address = args.input;
+            const savedApplication = await application.save()
+
+            return {
+                success: true,
+                message: "Address updated successfully!",
+                application: savedApplication,
+            };
+        }
+        catch(err){
+            return {
+                success: false,
+                message: (err as Error).message,
+                application: null,
+            };
+        }
+    },
+    updateNameSection: async(
+        _parent: any, 
+        args: {
+            input: {
+                firstName: string;
+                lastName: string;
+                middleName?: string;
+                preferredName?: string;
+                profilePicture?: string;
+            };
+        },
+        context: Context
+    ) => {
+        const currentUser = requireAuth(context);
+        const application = await OnboardingApplication.findOne({owner: currentUser.userId});
+        if(!application || application.status !== 'APPROVED'){
+            return {
+                success: false,
+                message: "You can only edit personal information after your application is approved.",
+                application: null,
+            };
+        }
+        try{
+            const {firstName, lastName, middleName, preferredName, profilePicture} = args.input;
+            application.firstName = firstName;
+            application.lastName = lastName;
+            if (middleName !== undefined) {
+                application.middleName = middleName;
+            }
+            if (preferredName !== undefined) {
+                application.preferredName = preferredName;
+            }
+            if (profilePicture !== undefined) {
+                application.profilePicture = new Types.ObjectId(profilePicture);
+            }
+            const savedApplication = await application.save()
+
+            return {
+                success: true,
+                message: "Name updated successfully!",
+                application: savedApplication,
+            };
+        }
+        catch(err){
+            return {
+                success: false,
+                message: (err as Error).message,
+                application: null,
+            };
+        }     
+    },
+    updateContactSection: async(
+        _parent: any, 
+        args: {
+            input: {
+                cellPhone: string;
+                workPhone?: string;
+            };
+        },
+        context: Context
+    ) => {
+        const currentUser = requireAuth(context);
+        const application = await OnboardingApplication.findOne({owner: currentUser.userId});
+        if(!application || application.status !== 'APPROVED'){
+            return {
+                success: false,
+                message: "You can only edit personal information after your application is approved.",
+                application: null,
+            };
+        }
+        try{
+            const {cellPhone, workPhone} = args.input;
+            application.cellPhone= cellPhone;
+            if ( workPhone !== undefined) {
+                application.workPhone = workPhone;
+            }
+            const savedApplication = await application.save()
+
+            return {
+                success: true,
+                message: "Contact info updated successfully!",
+                application: savedApplication,
+            };
+        }
+        catch(err){
+            return {
+                success: false,
+                message: (err as Error).message,
+                application: null,
+            };
+        }     
+    },
+    updateEmergencyContactSection: async(
+        _parent: any, 
+        args: {
+            input: IContactPerson[]; 
+        },
+        context: Context
+    ) => {
+        const currentUser = requireAuth(context);
+        const application = await OnboardingApplication.findOne({owner: currentUser.userId});
+        if(!application || application.status !== 'APPROVED'){
+            return {
+                success: false,
+                message: "You can only edit personal information after your application is approved.",
+                application: null,
+            };
+        }
+        try{
+            if (args.input.length < 1) {
+                return {
+                    success: false,
+                    message: "At least one emergency contact is required.",
+                    application: null,
+                };
+            }
+            application.emergencyContact= args.input;
+    
+            const savedApplication = await application.save()
+
+            return {
+                success: true,
+                message: "Emergency contact info updated successfully!",
+                application: savedApplication,
+            };
+        }
+        catch(err){
+            return {
+                success: false,
+                message: (err as Error).message,
+                application: null,
+            };
+        }     
     },
   },
 };
