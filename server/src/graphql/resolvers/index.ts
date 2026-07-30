@@ -94,6 +94,16 @@ const authResolvers = {
       if (!curApplication) return null;
       return curApplication;
     },
+    myPersonalInfo: async(
+        _parent: any,
+        _args: any, 
+        context: Context
+    ) => {
+        const currentUser = requireAuth(context);
+        const userApplication = await OnboardingApplication.findOne({owner: currentUser.userId});
+        if(!userApplication || userApplication.status !== 'APPROVED') return null;
+        return userApplication;
+    }
   },
   Mutation: {
     generateRegistrationToken: async (
