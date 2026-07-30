@@ -137,7 +137,6 @@ const authTypeDefs = `#graphql
     address: AddressInput!
     cellPhone: String!
     workPhone: String
-    onboardEmail: String!
     ssn: String!
     dob: String!
     gender: Gender!
@@ -159,11 +158,35 @@ const authTypeDefs = `#graphql
     application: OnboardingApplication
   }
 
+  type MyPersonalInfo {
+    firstName: String!
+    lastName: String!
+    middleName: String
+    preferredName: String
+    profilePicture: ID
+    address: Address!
+    cellPhone: String!
+    workPhone: String
+    onboardEmail: String!
+    ssn: String!
+    dob: String!
+    gender: Gender!
+    isPermanent: Boolean!
+    citizenshipType: CitizenshipType
+    workAuth: VisaType
+    otherVisaTitle: String
+    workAuthDoc: ID
+    visaStartDate: String
+    visaEndDate: String
+    emergencyContact: [ContactPerson!]!
+  }
+
   type Query {
     hello: String
     validateRegistrationToken(token: String!): TokenValidationResult
     me: User
     myOnboardingApplication: OnboardingApplication
+    myPersonalInfo: MyPersonalInfo
   }
 
   type Mutation {

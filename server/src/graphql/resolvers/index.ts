@@ -263,6 +263,16 @@ const authResolvers = {
       context: Context,
     ) => {
       const currentUser = requireAuth(context);
+      const userInfo = await User.findById(currentUser.userId);
+      if (!userInfo) {
+        return {
+            success: false,
+            message: "User not found",
+            application: null,
+        };
+    }
+
+    const onboardEmail = userInfo.email;
       const {
         firstName,
         lastName,
@@ -272,7 +282,7 @@ const authResolvers = {
         address,
         cellPhone,
         workPhone,
-        onboardEmail,
+        // onboardEmail,
         ssn,
         dob,
         gender,
