@@ -4,6 +4,7 @@ export const visaTypeDefs = `#graphql
     id: ID!
     type: String!
     filename: String!
+    fileSize: Int!
     url: String!            
     status: String!
     feedback: String

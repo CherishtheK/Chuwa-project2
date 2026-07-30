@@ -11,6 +11,7 @@ function toVisaDocument(d: IDocument) {
     id: String(d._id),
     type: d.type,
     filename: d.filename,
+    fileSize: d.fileSize,
     url: `/api/files/${d._id}`,
     status: d.status,
     feedback: d.feedback ?? null,
