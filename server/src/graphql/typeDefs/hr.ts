@@ -26,6 +26,7 @@ export const hrTypeDefs = `#graphql
     id: ID!
     invitedName: String!
     invitedEmail: String!
+    link: String!
     expireAt: String!
     used: Boolean!
     applicationSubmitted: Boolean!
