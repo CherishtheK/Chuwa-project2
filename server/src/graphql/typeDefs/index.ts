@@ -180,6 +180,25 @@ const authTypeDefs = `#graphql
     visaEndDate: String
     emergencyContact: [ContactPerson!]!
   }
+  
+    input UpdateNameInput {
+    firstName: String!
+    lastName: String!
+    middleName: String
+    preferredName: String
+    profilePicture: ID
+    }
+
+    input UpdateContactInput {
+    cellPhone: String!
+    workPhone: String
+    }
+
+    type UpdatePersonalInfoResult {
+    success: Boolean!
+    message: String
+    application: MyPersonalInfo
+    }
 
   type Query {
     hello: String
@@ -194,6 +213,10 @@ const authTypeDefs = `#graphql
     register(input: CreateUserInput!): AuthResult!
     login(input: LoginInput!): AuthResult!
     submitOnboardingApplication(input: SubmitOnboardingApplicationInput!): SubmitOnboardingApplicationResult!
+    updateNameSection(input: UpdateNameInput!): UpdatePersonalInfoResult!
+    updateAddressSection(input: AddressInput!): UpdatePersonalInfoResult!
+    updateContactSection(input: UpdateContactInput!): UpdatePersonalInfoResult!
+    updateEmergencyContactSection(input: [ContactPersonInput!]!): UpdatePersonalInfoResult!
   }
 
   
