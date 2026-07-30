@@ -17,7 +17,14 @@ async function startServer() {
   app.use(cors());
 
   const apolloMiddleware = await createApolloMiddleware();
-  app.use("/graphql", apolloMiddleware);
+  app.use(
+    "/graphql",
+    cors<cors.CorsRequest>({
+        origin: "http://localhost:5173",
+        credentials: true,
+    }),
+    apolloMiddleware
+  );
   app.use("/api", restRouter);
 
   app.get("/", (req, res) => res.send("Server is running"));

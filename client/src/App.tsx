@@ -15,13 +15,16 @@ import HiringManagementPage from "./features/hiringManagement/HiringManagementPa
 import ApplicationReviewPage from "./features/hiringManagement/ApplicationReviewPage";
 import EmployeeVisaStatusPage from "./features/visaStatus/EmployeeVisaStatusPage";
 import HRVisaStatusPage from "./features/visaStatus/HRVisaStatusPage";
+import AuthLayout from "./components/layout/Authlayout";
 
 export default function App() {
   return (
     <BrowserRouter>
       <Routes>
+        <Route element={<AuthLayout />}>
         <Route path="/login" element={<LoginPage />} />
         <Route path="/register" element={<RegistrationPage />} />
+        </Route>
 
         <Route
           element={
