@@ -1,25 +1,10 @@
+import { useRef, useState } from "react";
+import { useQuery } from "@apollo/client/react";
 import StatusBadge from "../../components/StatusBadge";
-const MOCK = {
-  isOpt: true,
-  nextStep: "Waiting for HR to approve your OPT EAD",
-  uploadableType: null as string | null,
-  steps: [
-    {
-      type: "OPT_RECEIPT",
-      status: "APPROVED",
-      feedback: null,
-      document: { id: "1", filename: "receipt.pdf", url: "/api/files/1" },
-    },
-    {
-      type: "OPT_EAD",
-      status: "PENDING",
-      feedback: null,
-      document: { id: "2", filename: "ead.pdf", url: "/api/files/2" },
-    },
-    { type: "I983", status: "NOT_UPLOADED", feedback: null, document: null },
-    { type: "I20", status: "NOT_UPLOADED", feedback: null, document: null },
-  ],
-};
+import { previewFile, downloadFile } from "../../utils/fileHelper";
+import { MY_VISA_STATUS } from "./graphql/visaQueries";
+import axios from "axios";
+
 const LABELS: Record<string, string> = {
   OPT_RECEIPT: "OPT Receipt",
   OPT_EAD: "OPT EAD",
@@ -28,8 +13,47 @@ const LABELS: Record<string, string> = {
 };
 
 export default function EmployeeVisaStatusPage() {
-  const { steps, nextStep, uploadableType } = MOCK; // TODO: useQuery(MY_VISA_STATUS)
+  const { data, loading, error, refetch } = useQuery(MY_VISA_STATUS);
+  const fileRef = useRef<HTMLInputElement>(null);
+  const [uploading, setUploading] = useState(false);
+  const [uploadError, setUploadError] = useState<string | null>(null);
+
+  const handleUpload = async (file: File | undefined, type: string) => {
+    if (!file) return;
+    setUploading(true);
+    setUploadError(null);
+    try {
+      const form = new FormData();
+      form.append("file", file);
+      form.append("type", type);
+      const token = localStorage.getItem("token");
+      await axios.post("/api/upload", form, {
+        headers: token ? { Authorization: `Bearer ${token}` } : {},
+      });
+      await refetch();
+    } catch (e) {
+      const msg = axios.isAxiosError(e) ? e.response?.data?.error : null;
+      setUploadError(msg ?? "Upload failed");
+    } finally {
+      setUploading(false);
+      if (fileRef.current) fileRef.current.value = "";
+    }
+  };
+
+  if (loading) return <p className="text-gray-500">Loading…</p>;
+  if (error) return <p className="text-danger">Error: {error.message}</p>;
+  if (!data) return null;
+  const { steps, nextStep, uploadableType, isOpt } = data.myVisaStatus;
+  if (!isOpt)
+    return (
+      <p className="text-gray-500">
+        This page only applies to F1 (OPT) visa holders.
+      </p>
+    );
+
   const currentIdx = steps.findIndex((s) => s.status !== "APPROVED");
+  const current = currentIdx !== -1 ? steps[currentIdx] : null;
+  const doc = current?.document;
 
   return (
     <>
@@ -38,6 +62,7 @@ export default function EmployeeVisaStatusPage() {
         Upload each document in order. The next unlocks once HR approves the
         current one.
       </p>
+      {/* 进度条 */}
       <div className="mt-8 flex items-center">
         {steps.map((s, i) => (
           <div key={s.type} className="flex flex-1 items-center last:flex-none">
@@ -60,6 +85,15 @@ export default function EmployeeVisaStatusPage() {
           </div>
         ))}
       </div>
+      {/* 全部完成 */}
+      {currentIdx === -1 && (
+        <div className="mt-8 flex items-center gap-3 rounded-xl bg-white p-6 shadow-sm">
+          <span className="flex h-9 w-9 items-center justify-center rounded-full bg-green-50 text-success">
+            ✓
+          </span>
+          <p className="font-semibold">{nextStep}</p>
+        </div>
+      )}
       {/* 当前step */}
       {currentIdx !== -1 && (
         <div className="mt-8 rounded-xl bg-white p-6 shadow-sm">
@@ -85,6 +119,32 @@ export default function EmployeeVisaStatusPage() {
               HR feedback: {steps[currentIdx].feedback}
             </p>
           )}
+          {steps[currentIdx].type === "I983" && (
+            <div className="mt-3 flex gap-3">
+              <button
+                className="rounded-lg border px-4 py-2 text-sm font-semibold"
+                onClick={() =>
+                  downloadFile(
+                    "/api/templates/i983-empty.pdf",
+                    "i983-empty.pdf",
+                  )
+                }
+              >
+                ⬇ Empty Template
+              </button>
+              <button
+                className="rounded-lg border px-4 py-2 text-sm font-semibold"
+                onClick={() =>
+                  downloadFile(
+                    "/api/templates/i983-sample.pdf",
+                    "i983-sample.pdf",
+                  )
+                }
+              >
+                ⬇ Sample Template
+              </button>
+            </div>
+          )}
           {steps[currentIdx].document && (
             <div className="mt-3 flex items-center justify-between rounded-lg border p-4">
               <div>
@@ -92,23 +152,45 @@ export default function EmployeeVisaStatusPage() {
                   {steps[currentIdx].document.filename}
                 </p>
                 <p className="text-xs text-gray-500">
-                  Uploaded Jul 18, 2026 · 188 KB
+                  Uploaded{" "}
+                  {new Date(
+                    steps[currentIdx].document!.uploadedAt,
+                  ).toLocaleDateString()}
                 </p>
-                {/* TODO: 真数据用 document.uploadedAt 格式化 + fileSize 换算 KB */}
               </div>
               <div className="flex gap-4 text-sm font-semibold text-primary">
-                <button>Preview</button>
-                <button>Download</button>
-                {/* TODO: blob util —— preview 不带参数，download 加 ?download=1 */}
+                <button onClick={() => previewFile(doc!.url)}>Preview</button>
+                <button onClick={() => downloadFile(doc!.url, doc!.filename)}>
+                  Download
+                </button>
               </div>
             </div>
           )}
 
           {uploadableType === steps[currentIdx].type && (
-            <button className="mt-4 rounded-lg bg-primary px-5 py-2 text-sm font-semibold text-white">
-              Upload {LABELS[steps[currentIdx].type]}
-              {/* TODO: <input type=file hidden> → POST /api/upload */}
-            </button>
+            <>
+              <input
+                ref={fileRef}
+                type="file"
+                accept="application/pdf"
+                className="hidden"
+                onChange={(e) =>
+                  handleUpload(e.target.files?.[0], steps[currentIdx].type)
+                }
+              />
+              <button
+                onClick={() => fileRef.current?.click()}
+                disabled={uploading}
+                className="mt-4 rounded-lg bg-primary px-5 py-2 text-sm font-semibold text-white disabled:opacity-50"
+              >
+                {uploading
+                  ? "Uploading…"
+                  : `Upload ${LABELS[steps[currentIdx].type]}`}
+              </button>
+              {uploadError && (
+                <p className="mt-2 text-sm text-danger">{uploadError}</p>
+              )}
+            </>
           )}
         </div>
       )}
@@ -131,7 +213,12 @@ export default function EmployeeVisaStatusPage() {
                 <p className="text-xs text-success">Approved by HR</p>
               </div>
             </div>
-            <button className="text-sm font-semibold text-primary">View</button>
+            <button
+              className="text-sm font-semibold text-primary"
+              onClick={() => s.document && previewFile(s.document.url)}
+            >
+              View
+            </button>
           </div>
         ))}
     </>
