@@ -84,7 +84,7 @@ export const hrResolvers = {
       return OnboardingApplication.find({ status: args.status });
     },
 
-    // HR visa status页面
+    // HR visa status页面(HR.08)
     visaEmployees: async (
       _p: any,
       args: { search?: string; inProgressOnly?: boolean },
@@ -124,6 +124,7 @@ export const hrResolvers = {
           daysRemaining: daysRemaining(app.visaEndDate),
           nextStep,
           pendingDocument: pendingDoc ? toVisaDocument(pendingDoc) : null,
+          documents: docs.map(toVisaDocument),
           _finished: uploadableType === null && !pendingDoc,
         };
       });

@@ -20,6 +20,7 @@ export const hrTypeDefs = `#graphql
     daysRemaining: Int
     nextStep: String!
     pendingDocument: VisaDocument
+    documents: [VisaDocument!]!
   }
 
   type RegistrationTokenRow {
