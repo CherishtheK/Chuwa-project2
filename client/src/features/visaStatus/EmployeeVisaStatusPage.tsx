@@ -106,7 +106,7 @@ export default function EmployeeVisaStatusPage() {
             <StatusBadge
               status={
                 steps[currentIdx].status === "PENDING"
-                  ? "PENDING"
+                  ? "PENDING_REVIEW"
                   : steps[currentIdx].status
               }
             />

@@ -87,85 +87,138 @@ export default function HRVisaStatusPage() {
       {rows.map((r) => (
         <div key={r.userId} className="mt-5 rounded-xl bg-white p-6 shadow-sm">
           {tab === "inProgress" ? (
-            <div
-              className="grid gap-6 lg:grid-cols-[1fr_2fr]
+            r.pendingDocument ? (
+              <div
+                className="grid gap-6 lg:grid-cols-[1fr_2fr]
 "
-            >
-              {/* ── 左侧信息摘要 ── */}
-              <div className="lg:border-r lg:pr-6">
-                <p className="font-bold">{r.fullName}</p>
-                <p className="text-sm text-gray-500">{r.email}</p>
-                <dl className="mt-4 space-y-2 text-sm">
-                  <div className="flex justify-between">
-                    <dt className="text-gray-500">Work auth.</dt>
-                    <dd className="font-semibold">F1 (OPT)</dd>
-                  </div>
-                  <div className="flex justify-between">
-                    <dt className="text-gray-500">Start – End</dt>
-                    <dd className="font-semibold">
-                      {r.visaStartDate?.slice(0, 10)} –{" "}
-                      {r.visaEndDate?.slice(0, 10)}
-                    </dd>
-                  </div>
-                  <div className="flex justify-between">
-                    <dt className="text-gray-500">Days remaining</dt>
-                    <dd
-                      className={`font-semibold ${r.daysRemaining !== null && r.daysRemaining < 90 ? "text-danger" : "text-success"}`}
-                    >
-                      {r.daysRemaining ?? "—"}
-                    </dd>
-                  </div>
-                </dl>
-                <div className="mt-4 rounded-lg bg-gray-50 p-3">
-                  <p className="text-xs text-gray-500">Next step</p>
-                  <p className="mt-0.5 text-sm font-semibold text-primary">
-                    {r.nextStep}
-                  </p>
-                </div>
-              </div>
-
-              {/* ── 右侧审批区 ── */}
-              {r.pendingDocument ? (
-                <div>
-                  <div className="flex items-center justify-between">
-                    <p className="font-bold">
-                      Document awaiting review ·{" "}
-                      {r.pendingDocument.type.replace(/_/g, " ")}
-                    </p>
-                    <StatusBadge status="NEEDS_ACTION" />
-                  </div>
-                  <div className="mt-3 flex items-center justify-between rounded-lg border p-4">
-                    <div>
-                      <p className="text-sm font-semibold">
-                        {r.pendingDocument.filename}
-                      </p>
-                      <p className="text-xs text-gray-500">
-                        Uploaded{" "}
-                        {new Date(
-                          r.pendingDocument.uploadedAt,
-                        ).toLocaleDateString()}
-                      </p>
+              >
+                {/* ── 左侧信息摘要 ── */}
+                <div className="lg:border-r lg:pr-6">
+                  <p className="font-bold">{r.fullName}</p>
+                  <p className="text-sm text-gray-500">{r.email}</p>
+                  <dl className="mt-4 space-y-2 text-sm">
+                    <div className="flex justify-between">
+                      <dt className="text-gray-500">Work auth.</dt>
+                      <dd className="font-semibold">F1 (OPT)</dd>
                     </div>
+                    <div className="flex justify-between">
+                      <dt className="text-gray-500">Start – End</dt>
+                      <dd className="font-semibold">
+                        {r.visaStartDate?.slice(0, 10)} –{" "}
+                        {r.visaEndDate?.slice(0, 10)}
+                      </dd>
+                    </div>
+                    <div className="flex justify-between">
+                      <dt className="text-gray-500">Days remaining</dt>
+                      <dd
+                        className={`font-semibold ${r.daysRemaining !== null && r.daysRemaining < 90 ? "text-danger" : "text-success"}`}
+                      >
+                        {r.daysRemaining ?? "—"}
+                      </dd>
+                    </div>
+                  </dl>
+                  <div className="mt-4 rounded-lg bg-gray-50 p-3">
+                    <p className="text-xs text-gray-500">Next step</p>
+                    <p className="mt-0.5 text-sm font-semibold text-primary">
+                      {r.nextStep}
+                    </p>
+                  </div>
+                </div>
+
+                {/* ── 右侧审批区 ── */}
+                {r.pendingDocument ? (
+                  <div>
+                    <div className="flex items-center justify-between">
+                      <p className="font-bold">
+                        Document awaiting review ·{" "}
+                        {r.pendingDocument.type.replace(/_/g, " ")}
+                      </p>
+                      <StatusBadge status="NEEDS_ACTION" />
+                    </div>
+                    <div className="mt-3 flex items-center justify-between rounded-lg border p-4">
+                      <div>
+                        <p className="text-sm font-semibold">
+                          {r.pendingDocument.filename}
+                        </p>
+                        <p className="text-xs text-gray-500">
+                          Uploaded{" "}
+                          {new Date(
+                            r.pendingDocument.uploadedAt,
+                          ).toLocaleDateString()}
+                        </p>
+                      </div>
+                      <button
+                        className="text-sm font-semibold text-primary"
+                        onClick={() => previewFile(r.pendingDocument!.url)}
+                      >
+                        Preview in browser ↗
+                      </button>
+                    </div>
+                    <ApprovalActionBar
+                      onSubmit={handleReview(r.pendingDocument.id)}
+                      loading={reviewing}
+                    />
+                  </div>
+                ) : (
+                  <div className="flex items-center justify-between">
+                    <p className="text-sm text-gray-500">
+                      Next step:{" "}
+                      <span className="font-semibold text-gray-900">
+                        {r.nextStep}
+                      </span>
+                    </p>
                     <button
-                      className="text-sm font-semibold text-primary"
-                      onClick={() => previewFile(r.pendingDocument!.url)}
+                      onClick={() => handleNotify(r.userId)}
+                      disabled={notifiedId === r.userId}
+                      className="rounded-lg border px-4 py-2 text-sm font-semibold text-primary disabled:opacity-50"
                     >
-                      Preview in browser ↗
+                      {notifiedId === r.userId
+                        ? "✓ Notification sent"
+                        : "✉ Send notification"}
                     </button>
                   </div>
-                  <ApprovalActionBar
-                    onSubmit={handleReview(r.pendingDocument.id)}
-                    loading={reviewing}
-                  />
+                )}
+              </div>
+            ) : (
+              /* ── 情况B：无待审 → 紧凑单行卡 ── */
+              <div
+                className="grid gap-6 lg:grid-cols-[1fr_2fr]
+"
+              >
+                <div>
+                  <div className="lg:border-r lg:pr-6">
+                    <p className="font-bold">{r.fullName}</p>
+                    <p className="text-sm text-gray-500">{r.email}</p>
+                    <dl className="mt-4 space-y-2 text-sm">
+                      <div className="flex justify-between">
+                        <dt className="text-gray-500">Work auth.</dt>
+                        <dd className="font-semibold">F1 (OPT)</dd>
+                      </div>
+                      <div className="flex justify-between">
+                        <dt className="text-gray-500">Start – End</dt>
+                        <dd className="font-semibold">
+                          {r.visaStartDate?.slice(0, 10)} –{" "}
+                          {r.visaEndDate?.slice(0, 10)}
+                        </dd>
+                      </div>
+                      <div className="flex justify-between">
+                        <dt className="text-gray-500">Days remaining</dt>
+                        <dd
+                          className={`font-semibold ${r.daysRemaining !== null && r.daysRemaining < 90 ? "text-danger" : "text-success"}`}
+                        >
+                          {r.daysRemaining ?? "—"}
+                        </dd>
+                      </div>
+                    </dl>
+                    <div className="mt-4 rounded-lg bg-gray-50 p-3">
+                      <p className="text-xs text-gray-500">Next step</p>
+                      <p className="mt-0.5 text-sm font-semibold text-primary">
+                        {r.nextStep}
+                      </p>
+                    </div>
+                  </div>
                 </div>
-              ) : (
-                <div className="flex items-center justify-between">
-                  <p className="text-sm text-gray-500">
-                    Next step:{" "}
-                    <span className="font-semibold text-gray-900">
-                      {r.nextStep}
-                    </span>
-                  </p>
+                <div className="flex items-center justify-end">
                   <button
                     onClick={() => handleNotify(r.userId)}
                     disabled={notifiedId === r.userId}
@@ -176,8 +229,8 @@ export default function HRVisaStatusPage() {
                       : "✉ Send notification"}
                   </button>
                 </div>
-              )}
-            </div>
+              </div>
+            )
           ) : (
             <>
               <div className="flex flex-wrap items-center justify-between gap-3">
