@@ -2,7 +2,7 @@ import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { useMutation } from "@apollo/client/react";
 import { useDispatch } from "react-redux";
-import { LOGIN_MUTATION } from "../../graphql/mutations/auth";
+import { LOGIN_MUTATION } from "./graphql/authMutations";
 import type { LoginResult, LoginVariables } from "../../types/auth";
 import { setCredentials } from "./authSlice";
 
