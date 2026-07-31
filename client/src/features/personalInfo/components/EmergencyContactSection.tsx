@@ -2,16 +2,17 @@ import { useForm, useFieldArray } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useMutation } from "@apollo/client/react";
 import { useState } from "react";
-import { UPDATE_EMERGENCY_CONTACT_SECTION } from "./graphql/PersonalInfoMutations";
+import { UPDATE_EMERGENCY_CONTACT_SECTION } from "../graphql/PersonalInfoMutations";
+import EditableSection from "../../../components/EditableSection";
 import {
   emergencyContactSectionSchema,
   type EmergencyContactSectionValues,
-} from "./personalInfoSchemas";
+} from "../personalInfoSchemas";
 import type {
   MyPersonalInfoData,
   UpdateEmergencyContactResult,
   UpdateEmergencyContactVariables,
-} from "../../types/personalInfo";
+} from "../../../types/personalInfo";
 
 interface Props {
   info: MyPersonalInfoData;
@@ -82,18 +83,22 @@ export default function EmergencyContactSection({ info, onSaved }: Props) {
   };
 
   return (
-    <section className="rounded-xl border border-gray-200 bg-white p-6">
-      <div className="mb-4 flex items-center justify-between">
-        <h2 className="text-lg font-bold">Emergency Contacts</h2>
-        {!editing && (
-          <button onClick={() => setEditing(true)} className="text-sm font-medium text-primary">
-            Edit
-          </button>
-        )}
-      </div>
-
-      {editing ? (
-        <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
+    <EditableSection
+      title="Emergency Contacts"
+      editing={editing}
+      submitting={isSubmitting}
+      onEdit={() => setEditing(true)}
+      onCancel={handleCancel}
+      onSubmit={handleSubmit(onSubmit)}
+      viewContent={
+        <div className="space-y-2 text-sm">
+          {info.emergencyContact.map((c, i) => (
+            <div key={i}>{c.firstName} {c.lastName} — {c.relationship}</div>
+          ))}
+        </div>
+      }
+      editContent={
+        <>
           {fields.map((field, index) => (
             <div key={field.id} className="grid grid-cols-2 gap-4 border-b border-gray-100 pb-4">
               <div>
@@ -163,22 +168,8 @@ export default function EmergencyContactSection({ info, onSaved }: Props) {
           >
             + Add another
           </button>
-          <div className="flex justify-end gap-3">
-            <button type="button" onClick={handleCancel} className="rounded-lg border border-gray-200 px-4 py-2 text-sm">
-              Cancel
-            </button>
-            <button type="submit" disabled={isSubmitting} className="rounded-lg bg-primary px-4 py-2 text-sm font-semibold text-white">
-              Save
-            </button>
-          </div>
-        </form>
-      ) : (
-        <div className="space-y-2 text-sm">
-          {info.emergencyContact.map((c, i) => (
-            <div key={i}>{c.firstName} {c.lastName} — {c.relationship}</div>
-          ))}
-        </div>
-      )}
-    </section>
+        </>
+      }
+    />
   );
 }

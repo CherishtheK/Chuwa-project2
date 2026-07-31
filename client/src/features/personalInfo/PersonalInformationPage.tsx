@@ -3,7 +3,7 @@ import { MY_PERSONAL_INFO_QUERY } from "./graphql/PersonalInfoQueries";
 import NameSection from "./components/NameSection";
 import AddressSection from "./components/AddressSection";
 import ContactSection from "./components/ContactSection";
-import EmergencyContactSection from "./EmergencyContactSection";
+import EmergencyContactSection from "./components/EmergencyContactSection";
 import DocumentsSection from "./components/DocumentsSection";
 import type { MyPersonalInfoResult } from "../../types/personalInfo";
 

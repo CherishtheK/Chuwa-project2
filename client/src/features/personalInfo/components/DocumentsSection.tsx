@@ -1,5 +1,6 @@
 import { fetchFileAsBlobUrl } from "../../../lib/uploadFile";
 import type { MyPersonalInfoData } from "../../../types/personalInfo";
+import EditableSection from "../../../components/EditableSection";
 
 interface Props {
   info: MyPersonalInfoData;
