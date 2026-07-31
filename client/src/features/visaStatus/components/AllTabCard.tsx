@@ -31,7 +31,10 @@ export default function AllTabCard({ row }: { row: VisaEmployeeRow }) {
 
       <div className="mt-4 divide-y">
         {approvedDocs.map((d) => (
-          <div key={d.id} className="flex items-center justify-between py-2.5">
+          <div
+            key={d.id}
+            className="flex flex-col gap-2 py-2.5 sm:flex-row sm:items-center sm:justify-between"
+          >
             <div>
               <p className="text-sm font-semibold">
                 {d.type.replace(/_/g, " ")}

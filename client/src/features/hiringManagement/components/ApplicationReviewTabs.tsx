@@ -21,26 +21,30 @@ export default function ApplicationReviewTabs({
 }: Props) {
   return (
     <div className="mt-6 rounded-xl bg-white p-6 shadow-sm">
-      <div className="flex items-center justify-between">
+      <div className="flex flex-wrap items-center justify-between gap-3">
         <h2>Onboarding application review</h2>
         <Segmented
+          className="max-w-full overflow-x-auto"
           value={tab}
           className="[&_.ant-segmented-item]:font-semibold [&_.ant-segmented-item-selected]:text-primary!"
           onChange={(v) => onTabChange(v as Tab)}
-          options={TABS.map((s) => {
-            const label = s[0] + s.slice(1).toLowerCase();
-            return {
-              label:
-                counts[s] === undefined ? label : `${label} (${counts[s]})`,
-              value: s,
-            };
-          })}
+          options={TABS.map((s) => ({
+            label: (
+              <span>
+                {s[0] + s.slice(1).toLowerCase()}
+                {counts[s] !== undefined && (
+                  <span className="hidden sm:inline"> ({counts[s]})</span>
+                )}
+              </span>
+            ),
+            value: s,
+          }))}
         />
       </div>
       {apps.map((a) => (
         <div
           key={a.owner}
-          className="mt-4 flex items-center justify-between rounded-lg border p-4"
+          className="mt-4 flex flex-col gap-3 rounded-lg border p-4 sm:flex-row sm:items-center sm:justify-between"
         >
           <div>
             <p className="font-semibold">
@@ -52,7 +56,7 @@ export default function ApplicationReviewTabs({
             href={`/hr/applications/${a.owner}`}
             target="_blank"
             rel="noreferrer"
-            className="rounded-lg border px-4 py-2 text-sm font-semibold text-primary"
+            className="self-start rounded-lg border px-4 py-2 text-sm font-semibold text-primary sm:self-auto"
           >
             View application ↗
           </a>

@@ -3,6 +3,7 @@ import StatusBadge from "../../../components/StatusBadge";
 import { previewFile } from "../../../utils/fileHelper";
 import type { VisaEmployeeRow } from "../graphql/visaQueries";
 import EmployeeSummary from "./EmployeeSummary";
+import { MailOutlined, CheckOutlined } from "@ant-design/icons";
 
 interface Props {
   row: VisaEmployeeRow;
@@ -29,7 +30,7 @@ export default function InProgressCard({
         <EmployeeSummary row={row} />
 
         {doc ? (
-          <div>
+          <div className="min-w-0">
             <div className="flex items-center justify-between">
               <p className="font-bold">
                 Document awaiting review · {doc.type.replace(/_/g, " ")}
@@ -47,10 +48,13 @@ export default function InProgressCard({
                 className="text-sm font-semibold text-primary"
                 onClick={() => previewFile(doc.url)}
               >
-                Preview in browser ↗
+                Preview
               </button>
             </div>
-            <ApprovalActionBar onSubmit={onReview(doc.id)} loading={reviewing} />
+            <ApprovalActionBar
+              onSubmit={onReview(doc.id)}
+              loading={reviewing}
+            />
           </div>
         ) : (
           <div className="flex items-center justify-end">
@@ -59,7 +63,15 @@ export default function InProgressCard({
               disabled={notified}
               className="rounded-lg border px-4 py-2 text-sm font-semibold text-primary disabled:opacity-50"
             >
-              {notified ? "✓ Notification sent" : "✉ Send notification"}
+              {notified ? (
+                <>
+                  <CheckOutlined /> Notification sent
+                </>
+              ) : (
+                <>
+                  <MailOutlined /> Send notification
+                </>
+              )}
             </button>
           </div>
         )}

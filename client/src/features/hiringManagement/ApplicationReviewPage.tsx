@@ -8,7 +8,8 @@ import {
   REVIEW_APPLICATION,
 } from "./graphql/applicationReviewQueries";
 import { previewFile } from "../../utils/fileHelper";
-import { Field, Section } from "./components/FieldSection";
+import { Field, Section } from "../../components/FieldSection";
+import { formatDate } from "../../utils/format";
 
 export default function ApplicationReviewPage() {
   const { userId } = useParams<{ userId: string }>();
@@ -64,7 +65,7 @@ export default function ApplicationReviewPage() {
           <Field label="First name" value={app.firstName} />
           <Field label="Last name" value={app.lastName} />
           <Field label="Preferred name" value={app.preferredName} />
-          <Field label="Date of birth" value={app.dob?.slice(0, 10)} />
+          <Field label="Date of birth" value={formatDate(app.dob)} />
         </Section>
 
         <Section title="Address & Contact">
@@ -115,8 +116,8 @@ export default function ApplicationReviewPage() {
                   : app.workAuth
             }
           />
-          <Field label="Start date" value={app.visaStartDate?.slice(0, 10)} />
-          <Field label="End date" value={app.visaEndDate?.slice(0, 10)} />
+          <Field label="Start date" value={formatDate(app.visaStartDate)} />
+          <Field label="End date" value={formatDate(app.visaEndDate)} />
           {app.workAuthDoc && (
             <div className="col-span-full mt-2 flex items-center justify-between rounded-lg border p-4">
               <p className="text-sm font-semibold">

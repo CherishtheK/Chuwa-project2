@@ -1,9 +1,13 @@
-import { NavLink, Outlet, useNavigate } from "react-router-dom";
+import { useState } from "react";
+import { Outlet, useNavigate } from "react-router-dom";
 import { useDispatch } from "react-redux";
 import { useApolloClient, useQuery } from "@apollo/client/react";
+import { Drawer } from "antd";
+import { MenuOutlined } from "@ant-design/icons";
 import { logout } from "../../features/auth/authSlice";
 import { MY_ONBOARDING_APPLICATION_QUERY } from "../../features/onboarding/graphql/onboardingQueries";
 import type { MyOnboardingApplicationResult } from "../../types/onboarding";
+import SidebarContent from "./SidebarContent";
 
 const hrLinks = [
   { to: "/hr", label: "Home" },
@@ -19,6 +23,7 @@ const employeeLinks = [
 ];
 
 export default function AppLayout({ role }: { role: "hr" | "employee" }) {
+  const [menuOpen, setMenuOpen] = useState(false);
 
   const { data } = useQuery<MyOnboardingApplicationResult>(
     MY_ONBOARDING_APPLICATION_QUERY,
@@ -39,39 +44,40 @@ export default function AppLayout({ role }: { role: "hr" | "employee" }) {
   };
 
   return (
-    <div className="flex min-h-screen bg-page">
-      <aside className="flex w-60 flex-col bg-sidebar text-white">
-        <div className="flex items-center gap-2 px-6 py-6 text-lg font-bold">
-          <span className="flex h-8 w-8 items-center justify-center rounded-lg bg-primary">
+    <div className="min-h-screen bg-page md:flex">
+      <header className="flex items-center justify-between bg-sidebar px-4 py-3 text-white md:hidden">
+        <div className="flex items-center gap-2 font-bold">
+          <span className="flex h-7 w-7 items-center justify-center rounded-lg bg-primary">
             ◇
           </span>
           Meridian
         </div>
-        <p className="px-6 pb-2 text-xs uppercase tracking-widest text-gray-400">
-          {role === "hr" ? "HR Console" : "Menu"}
-        </p>
-        <nav className="flex flex-1 flex-col gap-1 px-3">
-          {links.map((l) => (
-            <NavLink
-              key={l.to}
-              to={l.to}
-              end={l.to === "/" || l.to === "/hr"}
-              className={({ isActive }) =>
-                `rounded-lg px-3 py-2 text-sm ${isActive ? "bg-primary text-white" : "text-gray-400 hover:text-white"}`
-              }
-            >
-              {l.label}
-            </NavLink>
-          ))}
-        </nav>
-        <button
-          onClick={handleLogout}
-          className="px-6 py-5 text-left text-sm text-gray-400 hover:text-white"
-        >
-          Logout
+        <button onClick={() => setMenuOpen(true)} aria-label="Open menu">
+          <MenuOutlined className="text-lg" />
         </button>
+      </header>
+
+      <Drawer
+        placement="left"
+        open={menuOpen}
+        onClose={() => setMenuOpen(false)}
+        width={240}
+        closable={false}
+        styles={{ body: { padding: 0 } }}
+      >
+        <SidebarContent
+          role={role}
+          links={links}
+          onLogout={handleLogout}
+          onNavigate={() => setMenuOpen(false)}
+        />
+      </Drawer>
+
+      <aside className="hidden w-60 md:block">
+        <SidebarContent role={role} links={links} onLogout={handleLogout} />
       </aside>
-      <main className="flex-1 p-10">
+
+      <main className="flex-1 p-6 md:p-10">
         <Outlet />
       </main>
     </div>

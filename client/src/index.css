@@ -9,6 +9,16 @@
 }
 
 @layer base {
+  /* Tailwind v4 把无色 border 的默认值从 gray-200 改成了 currentColor，
+     这里恢复 v3 的浅灰默认，显式写了颜色的 border 不受影响 */
+  *,
+  ::after,
+  ::before,
+  ::backdrop,
+  ::file-selector-button {
+    border-color: var(--color-gray-200);
+  }
+
   h1 {
     @apply text-2xl font-bold text-gray-900;
   }

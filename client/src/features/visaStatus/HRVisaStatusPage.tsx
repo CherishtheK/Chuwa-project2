@@ -8,6 +8,8 @@ import {
 } from "./graphql/visaQueries";
 import InProgressCard from "./components/InProgressCard";
 import AllTabCard from "./components/AllTabCard";
+import SearchInput from "../../components/SearchInput";
+import { recordsFoundLabel } from "../../utils/format";
 
 export default function HRVisaStatusPage() {
   const [tab, setTab] = useState<"inProgress" | "all">("inProgress");
@@ -38,13 +40,7 @@ export default function HRVisaStatusPage() {
     return <p className="text-danger">Error: {activeQ.error.message}</p>;
   const rows = activeQ.data?.visaEmployees ?? [];
 
-  const resultLabel = !search
-    ? null
-    : rows.length === 0
-      ? "No records found"
-      : rows.length === 1
-        ? "1 record found"
-        : `${rows.length} records found`;
+  const resultLabel = !search ? null : recordsFoundLabel(rows.length);
 
   const handleReview =
     (documentId: string) =>
@@ -68,7 +64,7 @@ export default function HRVisaStatusPage() {
 
   return (
     <>
-      <div className="flex items-center justify-between">
+      <div className="flex flex-wrap items-center justify-between gap-3">
         <h1>Visa Status Management</h1>
         <Segmented
           value={tab}
@@ -81,12 +77,9 @@ export default function HRVisaStatusPage() {
         />
       </div>
 
-      <input
-        value={search}
-        onChange={(e) => setSearch(e.target.value)}
-        placeholder="Search by first, last, or preferred name…"
-        className="mt-4 w-80 rounded-lg border bg-white px-4 py-2 text-sm"
-      />
+      <div className="mt-4">
+        <SearchInput onSearch={setSearch} />
+      </div>
       {resultLabel && (
         <p className="mt-2 text-sm text-gray-500">{resultLabel}</p>
       )}

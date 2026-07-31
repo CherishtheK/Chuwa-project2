@@ -29,18 +29,18 @@ export default function TokenGenerator({ inviting, onInvite }: Props) {
         Generate a registration token and email the signup link. Tokens expire
         after 3 hours.
       </p>
-      <div className="mt-4 flex gap-2">
+      <div className="mt-4 flex flex-wrap gap-2">
         <input
           value={name}
           onChange={(e) => setName(e.target.value)}
           placeholder="Name"
-          className="rounded-lg px-3 py-2 text-sm text-gray-900 bg-white"
+          className="w-full rounded-lg px-3 py-2 text-sm text-gray-900 bg-white sm:w-auto"
         />
         <input
           value={email}
           onChange={(e) => setEmail(e.target.value)}
           placeholder="email@example.com"
-          className="w-64 rounded-lg px-3 py-2 text-sm text-gray-900 bg-white"
+          className="w-full rounded-lg px-3 py-2 text-sm text-gray-900 bg-white sm:w-64"
         />
         <button
           onClick={handleSubmit}

@@ -39,6 +39,11 @@ async function makeDoc(
   });
 }
 
+type OnboardingDocType =
+  | "PROFILE_PICTURE"
+  | "DRIVERS_LICENSE"
+  | "WORK_AUTHORIZATION";
+
 async function makeEmployee(opts: {
   userName: string;
   email: string;
@@ -49,6 +54,7 @@ async function makeEmployee(opts: {
   workAuth?: "F1_CPT_OPT" | "H1B";
   isPermanent?: boolean;
   citizenshipType?: "CITIZEN" | "GREEN_CARD";
+  onboardingDocs?: OnboardingDocType[];
 }) {
   const passwordHash = await hashPassword("Test@123");
   const user = await User.create({
@@ -58,9 +64,25 @@ async function makeEmployee(opts: {
     role: "employee",
   });
 
+  // onboarding 文档必须 APPROVED：visaEmployees 的 pendingDocument 取的是
+  // 全部文档里第一个 PENDING，不能被非 OPT 文档占位
+  const docFields: {
+    profilePicture?: mongoose.Types.ObjectId;
+    driversLicense?: mongoose.Types.ObjectId;
+    workAuthDoc?: mongoose.Types.ObjectId;
+  } = {};
+  for (const type of opts.onboardingDocs ?? []) {
+    const doc = await makeDoc(user._id, type, "APPROVED");
+    const id = doc._id as mongoose.Types.ObjectId;
+    if (type === "PROFILE_PICTURE") docFields.profilePicture = id;
+    else if (type === "DRIVERS_LICENSE") docFields.driversLicense = id;
+    else docFields.workAuthDoc = id;
+  }
+
   await OnboardingApplication.create({
     owner: user._id,
     status: opts.appStatus,
+    ...docFields,
     ...(opts.feedback ? { feedback: opts.feedback } : {}),
     firstName: opts.firstName,
     lastName: opts.lastName,
@@ -130,6 +152,7 @@ async function main() {
     lastName: "Rivera",
     appStatus: "APPROVED",
     workAuth: "F1_CPT_OPT",
+    onboardingDocs: ["PROFILE_PICTURE", "DRIVERS_LICENSE", "WORK_AUTHORIZATION"],
   });
   await makeDoc(jordan._id, "OPT_RECEIPT", "APPROVED");
   await makeDoc(jordan._id, "OPT_EAD", "PENDING");
@@ -142,6 +165,7 @@ async function main() {
     lastName: "Nair",
     appStatus: "APPROVED",
     workAuth: "F1_CPT_OPT",
+    onboardingDocs: ["PROFILE_PICTURE", "WORK_AUTHORIZATION"],
   });
   await makeDoc(priya._id, "OPT_RECEIPT", "APPROVED");
   await makeDoc(priya._id, "OPT_EAD", "APPROVED");
@@ -155,6 +179,7 @@ async function main() {
     appStatus: "APPROVED",
     isPermanent: true,
     citizenshipType: "CITIZEN",
+    onboardingDocs: ["PROFILE_PICTURE", "DRIVERS_LICENSE"],
   });
 
   // ── 员工4 Devon：申请待审 → Hiring Pending tab demo ──
@@ -165,6 +190,7 @@ async function main() {
     lastName: "Clarke",
     appStatus: "PENDING",
     workAuth: "F1_CPT_OPT",
+    onboardingDocs: ["WORK_AUTHORIZATION"],
   });
   await makeDoc(devon._id, "OPT_RECEIPT", "PENDING");
 
@@ -177,6 +203,52 @@ async function main() {
     appStatus: "REJECTED",
     workAuth: "H1B",
     feedback: "SSN format is invalid. Please correct and resubmit.",
+    onboardingDocs: ["WORK_AUTHORIZATION"],
+  });
+
+  // ── 员工6 Hassan：OPT 四个文档全批 → 流程完结态（只出现在 All tab）──
+  const hassan = await makeEmployee({
+    userName: "hassan",
+    email: "hassan@example.com",
+    firstName: "Hassan",
+    lastName: "Ali",
+    appStatus: "APPROVED",
+    workAuth: "F1_CPT_OPT",
+    onboardingDocs: ["PROFILE_PICTURE", "DRIVERS_LICENSE", "WORK_AUTHORIZATION"],
+  });
+  await makeDoc(hassan._id, "OPT_RECEIPT", "APPROVED");
+  await makeDoc(hassan._id, "OPT_EAD", "APPROVED");
+  await makeDoc(hassan._id, "I983", "APPROVED");
+  await makeDoc(hassan._id, "I20", "APPROVED");
+
+  // ── 员工7 Mei：EAD 被拒待重传 → HR 端 Send Notification + 员工端反馈 demo ──
+  const mei = await makeEmployee({
+    userName: "mei",
+    email: "mei@example.com",
+    firstName: "Mei",
+    lastName: "Zhang",
+    appStatus: "APPROVED",
+    workAuth: "F1_CPT_OPT",
+    onboardingDocs: ["WORK_AUTHORIZATION"],
+  });
+  await makeDoc(mei._id, "OPT_RECEIPT", "APPROVED");
+  await makeDoc(
+    mei._id,
+    "OPT_EAD",
+    "REJECTED",
+    "EAD card scan is blurry — please re-upload a clear copy.",
+  );
+
+  // ── 员工8 Elena：绿卡 → Profiles 显示 Green Card ──
+  await makeEmployee({
+    userName: "elena",
+    email: "elena@example.com",
+    firstName: "Elena",
+    lastName: "Petrova",
+    appStatus: "APPROVED",
+    isPermanent: true,
+    citizenshipType: "GREEN_CARD",
+    onboardingDocs: ["PROFILE_PICTURE", "DRIVERS_LICENSE"],
   });
 
   // ── 邀请历史：已提交 / 待注册 / 已过期 三种状态 ──
@@ -207,9 +279,12 @@ async function main() {
   console.log(`
 ✅ Seed 完成：
   HR:     hradmin / Admin@123
-  员工:   jordan · priya · marcus · devon · sofia （密码全部 Test@123）
-  状态:   jordan=EAD待审  priya=待发I983提醒  marcus=Citizen
-          devon=申请待审  sofia=申请被拒
+  员工:   jordan · priya · marcus · devon · sofia · hassan · mei · elena
+          （密码全部 Test@123）
+  状态:   jordan=EAD待审       priya=待发I983提醒   marcus=Citizen
+          devon=申请待审       sofia=申请被拒       hassan=OPT全部完成
+          mei=EAD被拒待重传    elena=Green Card
+  文档:   jordan/hassan 有全套 onboarding 文档，其余按身份各有部分
   tokens: 已提交 / 待注册 / 已过期 各一条
 `);
   await mongoose.disconnect();

@@ -2,7 +2,7 @@ import type { VisaEmployeeRow } from "../graphql/visaQueries";
 
 export default function EmployeeSummary({ row }: { row: VisaEmployeeRow }) {
   return (
-    <div className="lg:border-r lg:pr-6">
+    <div className="min-w-0 lg:border-r lg:pr-6">
       <p className="font-bold">{row.fullName}</p>
       <p className="text-sm text-gray-500">{row.email}</p>
       <dl className="mt-4 space-y-2 text-sm">
@@ -10,9 +10,9 @@ export default function EmployeeSummary({ row }: { row: VisaEmployeeRow }) {
           <dt className="text-gray-500">Work auth.</dt>
           <dd className="font-semibold">F1 (OPT)</dd>
         </div>
-        <div className="flex justify-between">
+        <div className="flex flex-wrap justify-between gap-x-4">
           <dt className="text-gray-500">Start – End</dt>
-          <dd className="font-semibold">
+          <dd className="text-right font-semibold">
             {row.visaStartDate?.slice(0, 10)} – {row.visaEndDate?.slice(0, 10)}
           </dd>
         </div>

@@ -25,7 +25,8 @@ export default function InvitationHistoryTable({
   return (
     <div className="mt-6 rounded-xl bg-white p-6 shadow-sm">
       <h2>Invitation history</h2>
-      <table className="mt-4 w-full text-sm">
+      <div className="overflow-x-auto">
+        <table className="mt-4 w-full min-w-[560px] text-sm">
         <thead>
           <tr className="border-b text-left text-xs uppercase text-gray-400">
             <th className="py-2">Name</th>
@@ -64,7 +65,8 @@ export default function InvitationHistoryTable({
             </tr>
           )}
         </tbody>
-      </table>
+        </table>
+      </div>
     </div>
   );
 }
