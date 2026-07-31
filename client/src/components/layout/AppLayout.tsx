@@ -1,4 +1,7 @@
-import { NavLink, Outlet } from "react-router-dom";
+import { NavLink, Outlet, useNavigate } from "react-router-dom";
+import { useDispatch } from "react-redux";
+import { useApolloClient } from "@apollo/client/react";
+import { logout } from "../../features/auth/authSlice";
 
 const hrLinks = [
   { to: "/hr", label: "Home" },
@@ -15,6 +18,17 @@ const employeeLinks = [
 
 export default function AppLayout({ role }: { role: "hr" | "employee" }) {
   const links = role === "hr" ? hrLinks : employeeLinks;
+  const navigate = useNavigate();
+  const dispatch = useDispatch();
+  const client = useApolloClient();
+
+  const handleLogout = async () => {
+    localStorage.removeItem("token");
+    dispatch(logout());
+    await client.clearStore();
+    navigate("/login");
+  };
+
   return (
     <div className="flex min-h-screen bg-page">
       <aside className="flex w-60 flex-col bg-sidebar text-white">
@@ -41,7 +55,10 @@ export default function AppLayout({ role }: { role: "hr" | "employee" }) {
             </NavLink>
           ))}
         </nav>
-        <button className="px-6 py-5 text-left text-sm text-gray-400 hover:text-white">
+        <button
+          onClick={handleLogout}
+          className="px-6 py-5 text-left text-sm text-gray-400 hover:text-white"
+        >
           Logout
         </button>
       </aside>
