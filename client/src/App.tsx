@@ -8,7 +8,7 @@ import OnboardingApplicationPage from "./features/onboarding/OnboardingApplicati
 import PersonalInformationPage from "./features/personalInfo/PersonalInformationPage";
 import EmployeeHomePage from "./features/home/EmployeeHomePage";
 
-import HRHomePage from "./features/home/HRHomePage";
+// import HRHomePage from "./features/home/HRHomePage";
 import EmployeeProfilesPage from "./features/employeeProfiles/EmployeeProfilesPage";
 import EmployeeFullProfilePage from "./features/employeeProfiles/EmployeeFullProfilePage";
 import HiringManagementPage from "./features/hiringManagement/HiringManagementPage";
@@ -22,8 +22,8 @@ export default function App() {
     <BrowserRouter>
       <Routes>
         <Route element={<AuthLayout />}>
-        <Route path="/login" element={<LoginPage />} />
-        <Route path="/register" element={<RegistrationPage />} />
+          <Route path="/login" element={<LoginPage />} />
+          <Route path="/register" element={<RegistrationPage />} />
         </Route>
 
         <Route
@@ -46,7 +46,7 @@ export default function App() {
             </ProtectedRoute>
           }
         >
-          <Route path="/hr" element={<HRHomePage />} />
+          <Route path="/hr" element={<Navigate to="/hr/employees" replace />} />
           <Route path="/hr/employees" element={<EmployeeProfilesPage />} />
           <Route path="/hr/hiring" element={<HiringManagementPage />} />
           <Route path="/hr/visa" element={<HRVisaStatusPage />} />
