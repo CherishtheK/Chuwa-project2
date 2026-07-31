@@ -175,6 +175,7 @@ const authTypeDefs = `#graphql
     workAuth: VisaType
     otherVisaTitle: String
     workAuthDoc: ID
+    driversLicense: ID
     visaStartDate: String
     visaEndDate: String
     emergencyContact: [ContactPerson!]!

@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import { uploadFile, fetchFileAsBlobUrl } from "../../lib/uploadFile";
+import { uploadFile, fetchFileAsBlobUrl } from "../../../lib/uploadFile";
 
 interface Props {
   documentId?: string;

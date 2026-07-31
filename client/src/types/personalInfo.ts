@@ -33,6 +33,7 @@ export interface MyPersonalInfoData {
   workAuth: "H1B" | "L2" | "F1_CPT_OPT" | "H4" | "OTHER" | null;
   otherVisaTitle: string | null;
   workAuthDoc: string | null;
+  driversLicense: string | null;
   visaStartDate: string | null;
   visaEndDate: string | null;
   emergencyContact: ContactPerson[];
