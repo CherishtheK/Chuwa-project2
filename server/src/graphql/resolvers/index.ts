@@ -110,7 +110,9 @@ const authResolvers = {
     generateRegistrationToken: async (
       _parent: any,
       args: { input: { invitedName: string; invitedEmail: string } },
+      context: Context
     ) => {
+      requireRole(context, "hr");
       const { invitedName, invitedEmail } = args.input;
       const token = generateToken();
       const expireAt = new Date(Date.now() + 3 * 60 * 60 * 1000);
