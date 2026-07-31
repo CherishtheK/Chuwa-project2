@@ -5,9 +5,9 @@ import { useNavigate } from "react-router-dom";
 import { onboardingSchema, type OnboardingFormValues } from "./onboardingSchema";
 import { SUBMIT_ONBOARDING_APPLICATION } from "./graphql/onboardingMutations";
 
-import FileUploadField from "./FileUploadField";
+import FileUploadField from "./components/FileUploadField";
 import type { OnboardingApplicationData } from "../../types/onboarding";
-import ProfilePictureField from "./ProfilePictureField";
+import ProfilePictureField from "./components/ProfilePictureField";
 
 interface Props {
   existingApplication?: OnboardingApplicationData | null;

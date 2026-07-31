@@ -28,13 +28,13 @@ export default function LoginPage() {
     const data = result.data?.login;
 
     if (data?.success && data.token && data.user) {
-      localStorage.setItem("token", data.token);
-      dispatch(setCredentials({ user: data.user, token: data.token }));
-
     if (isHrLogin && data.user.role !== "hr") {
       setErrorMsg("This account does not have HR access.");
       return;
     }
+
+    localStorage.setItem("token", data.token);
+    dispatch(setCredentials({ user: data.user, token: data.token }));
 
     if (data.user.role === "hr") {
       navigate("/hr");

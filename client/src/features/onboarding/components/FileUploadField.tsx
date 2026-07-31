@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { uploadFile, fetchFileAsBlobUrl } from "../../lib/uploadFile";
+import { uploadFile, fetchFileAsBlobUrl } from "../../../lib/uploadFile";
 
 interface Props {
   label: string;
