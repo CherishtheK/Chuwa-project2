@@ -1,4 +1,5 @@
 import { useState } from "react";
+import axios from "axios";
 import { uploadFile, previewFile, downloadFile } from "../../../utils/fileHelper";
 
 interface Props {
@@ -24,7 +25,10 @@ export default function FileUploadField({ label, docType, value, onChange, error
       const documentId = await uploadFile(file, docType);
       onChange(documentId);
     } catch (err) {
-      setUploadError(err instanceof Error ? err.message : "Upload failed");
+      const serverMessage = axios.isAxiosError(err)
+        ? (err.response?.data as { error?: string } | undefined)?.error
+        : null;
+      setUploadError(serverMessage ?? "Upload failed. Please try again.");
     } finally {
       setUploading(false);
     }
