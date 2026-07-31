@@ -144,13 +144,12 @@ const authResolvers = {
         input: {
           token: string;
           registerName: string;
-          registerEmail: string;
           password: string;
         };
       },
       _context: Context,
     ) => {
-      const { token, registerName, registerEmail, password } = args.input;
+      const { token, registerName, password } = args.input;
 
       //Verify hr token
       const curToken = await RegistrationToken.findOne({ token });
@@ -186,6 +185,8 @@ const authResolvers = {
           user: null,
         };
       }
+
+      const registerEmail = curToken.invitedEmail;
 
       // Check if user exists
       const existingUser = await User.findOne({
