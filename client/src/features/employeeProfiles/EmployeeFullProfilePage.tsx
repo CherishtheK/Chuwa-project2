@@ -3,38 +3,8 @@ import { useQuery } from "@apollo/client/react";
 import StatusBadge from "../../components/StatusBadge";
 import { previewFile } from "../../utils/fileHelper";
 import { EMPLOYEE_PROFILE } from "./graphql/employeeProfilesQueries";
-
-function Field({
-  label,
-  value,
-  className,
-}: {
-  label: string;
-  value?: string | null;
-  className?: string;
-}) {
-  return (
-    <div className={className}>
-      <p className="text-sm text-gray-500">{label}</p>
-      <p className="mt-1">{value || "—"}</p>
-    </div>
-  );
-}
-
-function Section({
-  title,
-  children,
-}: {
-  title: string;
-  children: React.ReactNode;
-}) {
-  return (
-    <div className="mt-5 rounded-xl bg-white p-6 shadow-sm">
-      <h2 className="pb-4">{title}</h2>
-      <div className="grid grid-cols-2 gap-6 md:grid-cols-4">{children}</div>
-    </div>
-  );
-}
+import { Field, Section } from "../../components/FieldSection";
+import { formatDate } from "../../utils/format";
 
 function DocRow({ label, docId }: { label: string; docId: string | null }) {
   if (!docId) return null;
@@ -79,7 +49,7 @@ export default function EmployeeFullProfilePage() {
           <Field label="First name" value={app.firstName} />
           <Field label="Last name" value={app.lastName} />
           <Field label="Preferred name" value={app.preferredName} />
-          <Field label="Date of birth" value={app.dob?.slice(0, 10)} />
+          <Field label="Date of birth" value={formatDate(app.dob)} />
           <Field label="Gender" value={app.gender} />
           <Field label="SSN" value={app.ssn} />
           <Field
@@ -119,8 +89,8 @@ export default function EmployeeFullProfilePage() {
                   : app.workAuth
             }
           />
-          <Field label="Start date" value={app.visaStartDate?.slice(0, 10)} />
-          <Field label="End date" value={app.visaEndDate?.slice(0, 10)} />
+          <Field label="Start date" value={formatDate(app.visaStartDate)} />
+          <Field label="End date" value={formatDate(app.visaEndDate)} />
         </Section>
 
         <Section title="Reference & Emergency Contacts">

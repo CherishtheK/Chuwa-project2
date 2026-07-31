@@ -1,5 +1,6 @@
 import { useParams } from "react-router-dom";
 import { useQuery, useMutation } from "@apollo/client/react";
+import { Alert, message } from "antd";
 import StatusBadge from "../../components/StatusBadge";
 import ApprovalActionBar from "../../components/ApprovalActionBar";
 import {
@@ -7,38 +8,8 @@ import {
   REVIEW_APPLICATION,
 } from "./graphql/applicationReviewQueries";
 import { previewFile } from "../../utils/fileHelper";
-
-function Field({
-  label,
-  value,
-  className,
-}: {
-  label: string;
-  value?: string | null;
-  className?: string;
-}) {
-  return (
-    <div className={className}>
-      <p className="text-sm text-gray-500">{label}</p>
-      <p className="mt-1">{value || "—"}</p>
-    </div>
-  );
-}
-
-function Section({
-  title,
-  children,
-}: {
-  title: string;
-  children: React.ReactNode;
-}) {
-  return (
-    <div className="mt-5 rounded-xl bg-white p-6 shadow-sm">
-      <h2 className="pb-4">{title}</h2>
-      <div className="grid grid-cols-2 gap-6 md:grid-cols-4">{children}</div>
-    </div>
-  );
-}
+import { Field, Section } from "../../components/FieldSection";
+import { formatDate } from "../../utils/format";
 
 export default function ApplicationReviewPage() {
   const { userId } = useParams<{ userId: string }>();
@@ -64,7 +35,7 @@ export default function ApplicationReviewPage() {
       },
     });
     if (res.data?.reviewApplication.success) await refetch();
-    else alert(res.data?.reviewApplication.message ?? "Review failed");
+    else message.error(res.data?.reviewApplication.message ?? "Review failed");
   };
 
   return (
@@ -81,17 +52,20 @@ export default function ApplicationReviewPage() {
         </div>
 
         {app.status === "REJECTED" && app.feedback && (
-          <div className="mt-4 rounded-lg bg-red-50 p-4 text-sm">
-            <p className="font-semibold text-danger">HR feedback</p>
-            <p className="mt-1">{app.feedback}</p>
-          </div>
+          <Alert
+            type="error"
+            showIcon
+            message="HR feedback"
+            description={app.feedback}
+            className="mt-4"
+          />
         )}
 
         <Section title="Name & Identity">
           <Field label="First name" value={app.firstName} />
           <Field label="Last name" value={app.lastName} />
           <Field label="Preferred name" value={app.preferredName} />
-          <Field label="Date of birth" value={app.dob?.slice(0, 10)} />
+          <Field label="Date of birth" value={formatDate(app.dob)} />
         </Section>
 
         <Section title="Address & Contact">
@@ -142,8 +116,8 @@ export default function ApplicationReviewPage() {
                   : app.workAuth
             }
           />
-          <Field label="Start date" value={app.visaStartDate?.slice(0, 10)} />
-          <Field label="End date" value={app.visaEndDate?.slice(0, 10)} />
+          <Field label="Start date" value={formatDate(app.visaStartDate)} />
+          <Field label="End date" value={formatDate(app.visaEndDate)} />
           {app.workAuthDoc && (
             <div className="col-span-full mt-2 flex items-center justify-between rounded-lg border p-4">
               <p className="text-sm font-semibold">

@@ -1,6 +1,8 @@
 import { useState } from "react";
 import { useQuery } from "@apollo/client/react";
 import { EMPLOYEES } from "./graphql/employeeProfilesQueries";
+import SearchInput from "../../components/SearchInput";
+import { recordsFoundLabel } from "../../utils/format";
 
 const AUTH_LABELS: Record<string, string> = {
   GREEN_CARD: "Green Card",
@@ -28,29 +30,20 @@ export default function EmployeeProfilesPage() {
 
   const label = !search
     ? `${rows.length} employees · ordered by last name`
-    : rows.length === 0
-      ? "No records found"
-      : rows.length === 1
-        ? "1 record found"
-        : `${rows.length} records found`;
+    : recordsFoundLabel(rows.length);
 
   return (
     <>
-      <div className="flex items-center justify-between">
+      <div className="flex flex-wrap items-center justify-between gap-3">
         <div>
           <h1>Employee Profiles</h1>
           <p className="mt-1 text-sm text-gray-500">{label}</p>
         </div>
-        <input
-          value={search}
-          onChange={(e) => setSearch(e.target.value)}
-          placeholder="Search by first, last, or preferred name…"
-          className="w-80 rounded-lg border bg-white px-4 py-2 text-sm"
-        />
+        <SearchInput onSearch={setSearch} />
       </div>
 
-      <div className="mt-6 overflow-hidden rounded-xl bg-white shadow-sm">
-        <table className="w-full text-sm">
+      <div className="mt-6 overflow-x-auto rounded-xl bg-white shadow-sm">
+        <table className="w-full min-w-[640px] text-sm">
           <thead>
             <tr className="border-b text-left text-xs uppercase tracking-wide text-gray-400">
               <th className="px-5 py-3">Name</th>

@@ -96,7 +96,7 @@ export default function EmployeeVisaStatusPage() {
           {steps[currentIdx].type === "I983" && (
             <div className="mt-3 flex gap-3">
               <button
-                className="inline-flex items-center gap-1.5 rounded-lg border border-gray-300 px-4 py-2 text-sm font-semibold hover:border-primary hover:text-primary"
+                className="inline-flex items-center gap-1.5 rounded-lg border px-4 py-2 text-sm font-semibold hover:border-primary hover:text-primary"
                 onClick={() =>
                   downloadFile(
                     "/api/templates/i983-empty.pdf",
@@ -108,7 +108,7 @@ export default function EmployeeVisaStatusPage() {
                 Empty Template
               </button>
               <button
-                className="inline-flex items-center gap-1.5 rounded-lg border border-gray-300 px-4 py-2 text-sm font-semibold hover:border-primary hover:text-primary"
+                className="inline-flex items-center gap-1.5 rounded-lg border px-4 py-2 text-sm font-semibold hover:border-primary hover:text-primary"
                 onClick={() =>
                   downloadFile(
                     "/api/templates/i983-sample.pdf",
