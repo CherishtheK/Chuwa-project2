@@ -1,5 +1,6 @@
 import { useState } from "react";
 import { useQuery, useMutation } from "@apollo/client/react";
+import { Segmented, message } from "antd";
 import {
   VISA_EMPLOYEES,
   REVIEW_DOCUMENT,
@@ -11,18 +12,31 @@ import AllTabCard from "./components/AllTabCard";
 export default function HRVisaStatusPage() {
   const [tab, setTab] = useState<"inProgress" | "all">("inProgress");
   const [search, setSearch] = useState("");
-  const { data, loading, error, refetch } = useQuery(VISA_EMPLOYEES, {
-    variables: {
-      search: search || undefined,
-      inProgressOnly: tab === "inProgress",
-    },
+  const inProgressQ = useQuery(VISA_EMPLOYEES, {
+    variables: { search: search || undefined, inProgressOnly: true },
+  });
+  const allQ = useQuery(VISA_EMPLOYEES, {
+    variables: { search: search || undefined, inProgressOnly: false },
   });
   const [reviewDoc, { loading: reviewing }] = useMutation(REVIEW_DOCUMENT);
   const [notify] = useMutation(SEND_NOTIFICATION);
   const [notifiedId, setNotifiedId] = useState<string | null>(null);
 
-  if (error) return <p className="text-danger">Error: {error.message}</p>;
-  const rows = data?.visaEmployees ?? [];
+  const activeQ = tab === "inProgress" ? inProgressQ : allQ;
+  const refetchAll = () =>
+    Promise.all([inProgressQ.refetch(), allQ.refetch()]);
+
+  const handleTabChange = (t: "inProgress" | "all") => {
+    setTab(t);
+    (t === "inProgress" ? inProgressQ : allQ).refetch();
+  };
+
+  const countLabel = (label: string, q: typeof inProgressQ) =>
+    q.data ? `${label} (${q.data.visaEmployees.length})` : label;
+
+  if (activeQ.error)
+    return <p className="text-danger">Error: {activeQ.error.message}</p>;
+  const rows = activeQ.data?.visaEmployees ?? [];
 
   const resultLabel = !search
     ? null
@@ -42,34 +56,29 @@ export default function HRVisaStatusPage() {
           ...(decision === "REJECT" ? { feedback } : {}),
         },
       });
-      if (res.data?.reviewDocument.success) await refetch();
-      else alert(res.data?.reviewDocument.message ?? "Review failed");
+      if (res.data?.reviewDocument.success) await refetchAll();
+      else message.error(res.data?.reviewDocument.message ?? "Review failed");
     };
 
   const handleNotify = async (userId: string) => {
     const res = await notify({ variables: { userId } });
     if (res.data?.sendNotification.success) setNotifiedId(userId);
-    else alert(res.data?.sendNotification.message ?? "Failed to send");
+    else message.error(res.data?.sendNotification.message ?? "Failed to send");
   };
 
   return (
     <>
       <div className="flex items-center justify-between">
         <h1>Visa Status Management</h1>
-        <div className="flex rounded-lg bg-gray-100 p-1 text-sm">
-          <button
-            onClick={() => setTab("inProgress")}
-            className={`rounded-md px-4 py-1.5 font-semibold ${tab === "inProgress" ? "bg-white text-primary shadow-sm" : "text-gray-700"}`}
-          >
-            In Progress
-          </button>
-          <button
-            onClick={() => setTab("all")}
-            className={`rounded-md px-4 py-1.5 font-semibold ${tab === "all" ? "bg-white text-primary shadow-sm" : "text-gray-700"}`}
-          >
-            All
-          </button>
-        </div>
+        <Segmented
+          value={tab}
+          className="[&_.ant-segmented-item]:font-semibold [&_.ant-segmented-item-selected]:text-primary!"
+          onChange={(v) => handleTabChange(v as "inProgress" | "all")}
+          options={[
+            { label: countLabel("In Progress", inProgressQ), value: "inProgress" },
+            { label: countLabel("All", allQ), value: "all" },
+          ]}
+        />
       </div>
 
       <input
@@ -81,7 +90,7 @@ export default function HRVisaStatusPage() {
       {resultLabel && (
         <p className="mt-2 text-sm text-gray-500">{resultLabel}</p>
       )}
-      {loading && <p className="mt-4 text-gray-500">Loading…</p>}
+      {activeQ.loading && <p className="mt-4 text-gray-500">Loading…</p>}
 
       {rows.map((r) =>
         tab === "inProgress" ? (
@@ -98,7 +107,7 @@ export default function HRVisaStatusPage() {
         ),
       )}
 
-      {!loading && rows.length === 0 && (
+      {!activeQ.loading && rows.length === 0 && (
         <p className="mt-8 text-center text-gray-400">
           {tab === "inProgress"
             ? "No employees with in-progress documents."
