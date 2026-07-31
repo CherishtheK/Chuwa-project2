@@ -1,5 +1,6 @@
 import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
 import ProtectedRoute from "./components/ProtectedRoute";
+import RequireApprovedEmployee from "./components/RequireApprovedEmployee";
 import AppLayout from "./components/layout/AppLayout";
 
 import LoginPage from "./features/auth/LoginPage";
@@ -33,10 +34,13 @@ export default function App() {
             </ProtectedRoute>
           }
         >
-          <Route path="/" element={<EmployeeHomePage />} />
           <Route path="/onboarding" element={<OnboardingApplicationPage />} />
-          <Route path="/personal-info" element={<PersonalInformationPage />} />
-          <Route path="/visa-status" element={<EmployeeVisaStatusPage />} />
+
+          <Route element={<RequireApprovedEmployee />}>
+            <Route path="/" element={<EmployeeHomePage />} />
+            <Route path="/personal-info" element={<PersonalInformationPage />} />
+            <Route path="/visa-status" element={<EmployeeVisaStatusPage />} />
+          </Route>
         </Route>
 
         <Route

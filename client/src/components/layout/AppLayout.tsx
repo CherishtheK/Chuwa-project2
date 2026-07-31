@@ -1,7 +1,9 @@
 import { NavLink, Outlet, useNavigate } from "react-router-dom";
 import { useDispatch } from "react-redux";
-import { useApolloClient } from "@apollo/client/react";
+import { useApolloClient, useQuery } from "@apollo/client/react";
 import { logout } from "../../features/auth/authSlice";
+import { MY_ONBOARDING_APPLICATION_QUERY } from "../../features/onboarding/graphql/onboardingQueries";
+import type { MyOnboardingApplicationResult } from "../../types/onboarding";
 
 const hrLinks = [
   { to: "/hr", label: "Home" },
@@ -17,7 +19,14 @@ const employeeLinks = [
 ];
 
 export default function AppLayout({ role }: { role: "hr" | "employee" }) {
-  const links = role === "hr" ? hrLinks : employeeLinks;
+
+  const { data } = useQuery<MyOnboardingApplicationResult>(
+    MY_ONBOARDING_APPLICATION_QUERY,
+    { skip: role !== "employee" },
+  );
+  const isApproved = data?.myOnboardingApplication?.status === "APPROVED";
+
+  const links = role === "hr" ? hrLinks : isApproved ? employeeLinks : [];
   const navigate = useNavigate();
   const dispatch = useDispatch();
   const client = useApolloClient();
