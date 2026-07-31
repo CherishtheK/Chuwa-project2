@@ -251,6 +251,53 @@ async function main() {
     onboardingDocs: ["PROFILE_PICTURE", "DRIVERS_LICENSE"],
   });
 
+  // ── 员工9 Tomas：H1B 申请待审 → Pending tab 第二例 ──
+  await makeEmployee({
+    userName: "tomas",
+    email: "tomas@example.com",
+    firstName: "Tomas",
+    lastName: "Okafor",
+    appStatus: "PENDING",
+    workAuth: "H1B",
+    onboardingDocs: ["WORK_AUTHORIZATION"],
+  });
+
+  // ── 员工10 Nina：OPT 申请待审（带全套文档）→ Pending tab 第三例 ──
+  await makeEmployee({
+    userName: "nina",
+    email: "nina@example.com",
+    firstName: "Nina",
+    lastName: "Kowalski",
+    appStatus: "PENDING",
+    workAuth: "F1_CPT_OPT",
+    onboardingDocs: ["PROFILE_PICTURE", "DRIVERS_LICENSE", "WORK_AUTHORIZATION"],
+  });
+
+  // ── 员工11 Ravi：申请被拒（日期问题）→ Rejected tab 第二例 ──
+  await makeEmployee({
+    userName: "ravi",
+    email: "ravi@example.com",
+    firstName: "Ravi",
+    lastName: "Menon",
+    appStatus: "REJECTED",
+    workAuth: "F1_CPT_OPT",
+    feedback:
+      "Visa start date does not match the uploaded work authorization document. Please verify and resubmit.",
+    onboardingDocs: ["WORK_AUTHORIZATION"],
+  });
+
+  // ── 员工12 Lily：申请被拒（缺紧急联系人电话）→ Rejected tab 第三例 ──
+  await makeEmployee({
+    userName: "lily",
+    email: "lily@example.com",
+    firstName: "Lily",
+    lastName: "Tran",
+    appStatus: "REJECTED",
+    workAuth: "H1B",
+    feedback:
+      "Emergency contact phone number is missing. Please complete it and resubmit.",
+  });
+
   // ── 邀请历史：已提交 / 待注册 / 已过期 三种状态 ──
   await RegistrationToken.create([
     {
@@ -279,12 +326,12 @@ async function main() {
   console.log(`
 ✅ Seed 完成：
   HR:     hradmin / Admin@123
-  员工:   jordan · priya · marcus · devon · sofia · hassan · mei · elena
-          （密码全部 Test@123）
-  状态:   jordan=EAD待审       priya=待发I983提醒   marcus=Citizen
-          devon=申请待审       sofia=申请被拒       hassan=OPT全部完成
-          mei=EAD被拒待重传    elena=Green Card
-  文档:   jordan/hassan 有全套 onboarding 文档，其余按身份各有部分
+  员工:   12 人，密码全部 Test@123
+  申请:   Pending=3 (devon·tomas·nina)   Approved=6   Rejected=3 (sofia·ravi·lily)
+  Visa:   jordan=EAD待审   priya=待发I983提醒   mei=EAD被拒待重传
+          hassan=OPT全部完成
+  身份:   marcus=Citizen   elena=Green Card   其余 F1/H1B
+  文档:   jordan/hassan/nina 有全套 onboarding 文档，其余按身份各有部分
   tokens: 已提交 / 待注册 / 已过期 各一条
 `);
   await mongoose.disconnect();
