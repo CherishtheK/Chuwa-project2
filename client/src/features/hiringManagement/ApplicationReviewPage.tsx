@@ -6,6 +6,7 @@ import {
   EMPLOYEE_APPLICATION,
   REVIEW_APPLICATION,
 } from "./graphql/applicationReviewQueries";
+import { previewFile } from "../../utils/fileHelper";
 
 function Field({
   label,
@@ -111,14 +112,51 @@ export default function ApplicationReviewPage() {
           <Field label="Email" value={app.onboardEmail} />
         </Section>
 
+        <Section title="Reference & Emergency Contacts">
+          <Field label="SSN" value={app.ssn} />
+          <Field label="Gender" value={app.gender} />
+          <Field
+            label="Reference"
+            value={`${app.reference.firstName} ${app.reference.lastName} (${app.reference.relationship})`}
+            className="col-span-2"
+          />
+          {app.emergencyContact.map((c, i) => (
+            <Field
+              key={i}
+              label={`Emergency ${i + 1}`}
+              value={`${c.firstName} ${c.lastName} (${c.relationship})`}
+              className="col-span-2"
+            />
+          ))}
+        </Section>
+
         <Section title="Work Authorization">
           <Field label="Citizen / PR?" value={app.isPermanent ? "Yes" : "No"} />
           <Field
             label="Type"
-            value={app.workAuth === "OTHER" ? app.otherVisaTitle : app.workAuth}
+            value={
+              app.isPermanent
+                ? app.citizenshipType
+                : app.workAuth === "OTHER"
+                  ? app.otherVisaTitle
+                  : app.workAuth
+            }
           />
           <Field label="Start date" value={app.visaStartDate?.slice(0, 10)} />
           <Field label="End date" value={app.visaEndDate?.slice(0, 10)} />
+          {app.workAuthDoc && (
+            <div className="col-span-full mt-2 flex items-center justify-between rounded-lg border p-4">
+              <p className="text-sm font-semibold">
+                Work authorization document
+              </p>
+              <button
+                className="text-sm font-semibold text-primary"
+                onClick={() => previewFile(`/api/files/${app.workAuthDoc}`)}
+              >
+                Preview ↗
+              </button>
+            </div>
+          )}
         </Section>
 
         {app.status === "PENDING" && (
