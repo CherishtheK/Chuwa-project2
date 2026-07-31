@@ -22,7 +22,8 @@ export async function uploadDocument(req: Request, res: Response) {
     fs.rmSync(path.join(uploadDir, file.filename), { force: true });
     return res.status(400).json({ error: "Invalid document type" });
   }
-  if (OPT_STEPS.includes(type)) {
+  const LOCKED_STEP_TYPES = ["OPT_EAD", "I983", "I20"];
+  if (LOCKED_STEP_TYPES.includes(type)) {
     const docs = await DocumentModel.find({ owner: user.userId });
 
     const { uploadableType } = computeVisaStatus(docs);
