@@ -3,6 +3,7 @@ const COLORS: Record<string, string> = {
   APPROVED: "bg-green-50 text-success",
   SUBMITTED: "bg-green-50 text-success",
   PENDING: "bg-amber-50 text-amber-600",
+  NEEDS_ACTION: "bg-amber-50 text-amber-600",
   REJECTED: "bg-red-50 text-danger",
   NOT_STARTED: "bg-gray-100 text-gray-500",
 };

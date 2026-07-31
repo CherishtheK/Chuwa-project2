@@ -24,6 +24,7 @@ export interface AppDetail {
   citizenshipType: string | null;
   workAuth: string | null;
   otherVisaTitle: string | null;
+  workAuthDoc: string | null;
   visaStartDate: string | null;
   visaEndDate: string | null;
   reference: { firstName: string; lastName: string; relationship: string };
@@ -65,6 +66,7 @@ export const EMPLOYEE_APPLICATION: TypedDocumentNode<
       citizenshipType
       workAuth
       otherVisaTitle
+      workAuthDoc
       visaStartDate
       visaEndDate
       reference {

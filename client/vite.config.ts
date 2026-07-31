@@ -7,8 +7,8 @@ export default defineConfig({
   plugins: [react(), tailwindcss()],
   server: {
     proxy: {
-      "/graphql": "http://localhost:5000",
-      "/api": "http://localhost:5000",
+      "/graphql": "http://localhost:4000",
+      "/api": "http://localhost:4000",
     },
   },
 });
