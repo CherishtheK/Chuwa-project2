@@ -21,6 +21,7 @@ export default function DocumentsSection({ info }: Props) {
 
   const docs = [
     { label: "Profile Picture", id: info.profilePicture },
+    { label: "Driver's License", id: info.driversLicense },
     { label: "Work Authorization", id: info.workAuthDoc },
   ].filter((d) => d.id);
 

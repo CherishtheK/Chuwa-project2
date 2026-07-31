@@ -2,7 +2,7 @@ import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useMutation } from "@apollo/client/react";
 import { useState } from "react";
-import { UPDATE_CONTACT_SECTION } from "./graphql/personalInfoMutations";
+import { UPDATE_CONTACT_SECTION } from "./graphql/PersonalInfoMutations";
 import { contactSectionSchema, type ContactSectionValues } from "./personalInfoSchemas";
 import type {
   MyPersonalInfoData,

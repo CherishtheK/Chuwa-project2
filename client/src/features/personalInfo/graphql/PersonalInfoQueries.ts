@@ -26,6 +26,7 @@ export const MY_PERSONAL_INFO_QUERY = gql`
       workAuth
       otherVisaTitle
       workAuthDoc
+      driversLicense
       visaStartDate
       visaEndDate
       emergencyContact {
