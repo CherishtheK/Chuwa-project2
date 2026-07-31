@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { uploadFile, fetchFileAsBlobUrl } from "../../../lib/uploadFile";
+import { uploadFile, previewFile, downloadFile } from "../../../utils/fileHelper";
 
 interface Props {
   label: string;
@@ -32,17 +32,12 @@ export default function FileUploadField({ label, docType, value, onChange, error
 
   const handlePreview = async () => {
     if (!value) return;
-    const url = await fetchFileAsBlobUrl(value, "preview");
-    window.open(url, "_blank");
+    await previewFile(`/api/files/${value}`);
   };
 
   const handleDownload = async () => {
     if (!value) return;
-    const url = await fetchFileAsBlobUrl(value, "download");
-    const a = document.createElement("a");
-    a.href = url;
-    a.download = "";
-    a.click();
+    await downloadFile(`/api/files/${value}`, label);
   };
 
   return (
