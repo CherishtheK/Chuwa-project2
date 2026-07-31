@@ -10,7 +10,6 @@ export default function LoginPage() {
   const [loginName, setLoginName] = useState("");
   const [loginPassword, setLoginPassword] = useState("");
   const [showPassword, setShowPassword] = useState(false);
-  const [isHrLogin, setIsHrLogin] = useState(false);
   const [errorMsg, setErrorMsg] = useState<string | null>(null);
 
   const navigate = useNavigate();
@@ -28,11 +27,6 @@ export default function LoginPage() {
     const data = result.data?.login;
 
     if (data?.success && data.token && data.user) {
-    if (isHrLogin && data.user.role !== "hr") {
-      setErrorMsg("This account does not have HR access.");
-      return;
-    }
-
     localStorage.setItem("token", data.token);
     dispatch(setCredentials({ user: data.user, token: data.token }));
 
@@ -86,18 +80,6 @@ export default function LoginPage() {
               {showPassword ? "Hide" : "Show"}
             </button>
           </div>
-        </div>
-
-        <div className="flex items-center justify-between">
-          <label className="flex items-center gap-2 text-sm text-gray-600">
-            <input
-              type="checkbox"
-              checked={isHrLogin}
-              onChange={(e) => setIsHrLogin(e.target.checked)}
-              className="rounded border-gray-300 text-primary focus:ring-primary"
-            />
-            Sign in as HR
-          </label>
         </div>
 
         {errorMsg && <p className="text-sm text-danger">{errorMsg}</p>}
