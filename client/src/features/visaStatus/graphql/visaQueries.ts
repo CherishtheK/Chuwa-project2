@@ -17,6 +17,13 @@ export interface VisaStep {
   document: VisaDoc | null;
 }
 
+export const STEP_LABELS: Record<string, string> = {
+  OPT_RECEIPT: "OPT Receipt",
+  OPT_EAD: "OPT EAD",
+  I983: "I-983",
+  I20: "I-20",
+};
+
 export interface MyVisaStatusData {
   myVisaStatus: {
     isOpt: boolean;
