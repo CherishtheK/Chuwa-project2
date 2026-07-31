@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import { uploadFile, fetchFileAsBlobUrl } from "../../../lib/uploadFile";
+import { uploadFile, getFileBlobUrl } from "../../../utils/fileHelper";
 
 interface Props {
   documentId?: string;
@@ -13,7 +13,7 @@ export default function ProfilePictureField({ documentId, onChange }: Props) {
         setImgUrl(null);
         return;
     }
-    fetchFileAsBlobUrl(documentId, "preview")
+    getFileBlobUrl(`/api/files/${documentId}`)
         .then(setImgUrl)
         .catch((err) => {
         console.error("Failed to load profile picture:", err);

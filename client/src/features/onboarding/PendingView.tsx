@@ -1,4 +1,4 @@
-import { fetchFileAsBlobUrl } from "../../lib/uploadFile";
+import { previewFile, downloadFile } from "../../utils/fileHelper";
 import type { OnboardingApplicationData } from "../../types/onboarding";
 
 interface Props {
@@ -13,16 +13,11 @@ const DOC_FIELDS: { key: keyof OnboardingApplicationData; label: string }[] = [
 
 export default function PendingView({ application }: Props) {
   const handlePreview = async (documentId: string) => {
-    const url = await fetchFileAsBlobUrl(documentId, "preview");
-    window.open(url, "_blank");
+    await previewFile(`/api/files/${documentId}`);
   };
 
   const handleDownload = async (documentId: string) => {
-    const url = await fetchFileAsBlobUrl(documentId, "download");
-    const a = document.createElement("a");
-    a.href = url;
-    a.download = "";
-    a.click();
+    await downloadFile(`/api/files/${documentId}`, "");
   };
 
   return (

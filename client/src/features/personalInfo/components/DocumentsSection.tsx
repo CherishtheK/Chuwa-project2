@@ -1,4 +1,4 @@
-import { fetchFileAsBlobUrl } from "../../../lib/uploadFile";
+import { previewFile, downloadFile } from "../../../utils/fileHelper";
 import type { MyPersonalInfoData } from "../../../types/personalInfo";
 import EditableSection from "../../../components/EditableSection";
 
@@ -8,16 +8,11 @@ interface Props {
 
 export default function DocumentsSection({ info }: Props) {
   const handlePreview = async (id: string) => {
-    const url = await fetchFileAsBlobUrl(id, "preview");
-    window.open(url, "_blank");
+    await previewFile(`/api/files/${id}`);
   };
 
-  const handleDownload = async (id: string) => {
-    const url = await fetchFileAsBlobUrl(id, "download");
-    const a = document.createElement("a");
-    a.href = url;
-    a.download = "";
-    a.click();
+  const handleDownload = async (id: string, label: string) => {
+    await downloadFile(`/api/files/${id}`, label);
   };
 
   const docs = [
@@ -38,7 +33,7 @@ export default function DocumentsSection({ info }: Props) {
               <span>{d.label}</span>
               <div className="flex gap-3">
                 <button onClick={() => handlePreview(d.id!)} className="font-medium text-primary">Preview</button>
-                <button onClick={() => handleDownload(d.id!)} className="font-medium text-primary">Download</button>
+                <button onClick={() => handleDownload(d.id!, d.label)} className="font-medium text-primary">Download</button>
               </div>
             </div>
           ))}
