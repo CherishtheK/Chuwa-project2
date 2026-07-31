@@ -2,15 +2,10 @@ import { useRef, useState } from "react";
 import { useQuery } from "@apollo/client/react";
 import StatusBadge from "../../components/StatusBadge";
 import { previewFile, downloadFile } from "../../utils/fileHelper";
-import { MY_VISA_STATUS } from "./graphql/visaQueries";
+import { MY_VISA_STATUS, STEP_LABELS as LABELS } from "./graphql/visaQueries";
+import StepTracker from "./components/StepTracker";
 import axios from "axios";
-
-const LABELS: Record<string, string> = {
-  OPT_RECEIPT: "OPT Receipt",
-  OPT_EAD: "OPT EAD",
-  I983: "I-983",
-  I20: "I-20",
-};
+import { CloudDownloadOutlined } from "@ant-design/icons";
 
 export default function EmployeeVisaStatusPage() {
   const { data, loading, error, refetch } = useQuery(MY_VISA_STATUS);
@@ -62,29 +57,8 @@ export default function EmployeeVisaStatusPage() {
         Upload each document in order. The next unlocks once HR approves the
         current one.
       </p>
-      {/* 进度条 */}
-      <div className="mt-8 flex items-center">
-        {steps.map((s, i) => (
-          <div key={s.type} className="flex flex-1 items-center last:flex-none">
-            <div className="flex flex-col items-center">
-              <span
-                className={`flex h-9 w-9 items-center justify-center rounded-full text-sm font-bold
-                ${s.status === "APPROVED" ? "bg-success text-white" : i === currentIdx ? "bg-amber-500 text-white" : "bg-gray-200 text-gray-500"}`}
-              >
-                {s.status === "APPROVED" ? "✓" : i + 1}
-              </span>
-              <span className="mt-2 text-xs font-semibold">
-                {LABELS[s.type]}
-              </span>
-            </div>
-            {i < steps.length - 1 && (
-              <div
-                className={`mx-3 mb-5 h-0.5 flex-1 ${s.status === "APPROVED" ? "bg-success" : "bg-gray-200"}`}
-              />
-            )}
-          </div>
-        ))}
-      </div>
+
+      <StepTracker steps={steps} currentIdx={currentIdx} />
       {/* 全部完成 */}
       {currentIdx === -1 && (
         <div className="mt-8 flex items-center gap-3 rounded-xl bg-white p-6 shadow-sm">
@@ -122,7 +96,7 @@ export default function EmployeeVisaStatusPage() {
           {steps[currentIdx].type === "I983" && (
             <div className="mt-3 flex gap-3">
               <button
-                className="rounded-lg border px-4 py-2 text-sm font-semibold"
+                className="inline-flex items-center gap-1.5 rounded-lg border border-gray-300 px-4 py-2 text-sm font-semibold hover:border-primary hover:text-primary"
                 onClick={() =>
                   downloadFile(
                     "/api/templates/i983-empty.pdf",
@@ -130,10 +104,11 @@ export default function EmployeeVisaStatusPage() {
                   )
                 }
               >
-                ⬇ Empty Template
+                <CloudDownloadOutlined />
+                Empty Template
               </button>
               <button
-                className="rounded-lg border px-4 py-2 text-sm font-semibold"
+                className="inline-flex items-center gap-1.5 rounded-lg border border-gray-300 px-4 py-2 text-sm font-semibold hover:border-primary hover:text-primary"
                 onClick={() =>
                   downloadFile(
                     "/api/templates/i983-sample.pdf",
@@ -141,7 +116,8 @@ export default function EmployeeVisaStatusPage() {
                   )
                 }
               >
-                ⬇ Sample Template
+                <CloudDownloadOutlined />
+                Sample Template
               </button>
             </div>
           )}
