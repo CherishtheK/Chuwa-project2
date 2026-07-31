@@ -1,6 +1,5 @@
 import { previewFile, downloadFile } from "../../../utils/fileHelper";
 import type { MyPersonalInfoData } from "../../../types/personalInfo";
-import EditableSection from "../../../components/EditableSection";
 
 interface Props {
   info: MyPersonalInfoData;
@@ -16,7 +15,6 @@ export default function DocumentsSection({ info }: Props) {
   };
 
   const docs = [
-    { label: "Profile Picture", id: info.profilePicture },
     { label: "Driver's License", id: info.driversLicense },
     { label: "Work Authorization", id: info.workAuthDoc },
   ].filter((d) => d.id);

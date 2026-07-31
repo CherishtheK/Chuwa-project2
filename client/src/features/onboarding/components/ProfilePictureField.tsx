@@ -1,4 +1,5 @@
 import { useState, useEffect } from "react";
+import axios from "axios";
 import { uploadFile, getFileBlobUrl } from "../../../utils/fileHelper";
 
 interface Props {
@@ -8,6 +9,7 @@ interface Props {
 
 export default function ProfilePictureField({ documentId, onChange }: Props) {
   const [imgUrl, setImgUrl] = useState<string | null>(null);
+  const [uploadError, setUploadError] = useState<string | null>(null);
     useEffect(() => {
     if (!documentId) {
         setImgUrl(null);
@@ -24,8 +26,16 @@ export default function ProfilePictureField({ documentId, onChange }: Props) {
   const handleUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (!file) return;
-    const id = await uploadFile(file, "PROFILE_PICTURE");
-    onChange(id);
+    setUploadError(null);
+    try {
+      const id = await uploadFile(file, "PROFILE_PICTURE");
+      onChange(id);
+    } catch (err) {
+      const serverMessage = axios.isAxiosError(err)
+        ? (err.response?.data as { error?: string } | undefined)?.error
+        : null;
+      setUploadError(serverMessage ?? "Upload failed. Please try again.");
+    }
   };
 
   return (
@@ -41,6 +51,7 @@ export default function ProfilePictureField({ documentId, onChange }: Props) {
         Upload
         <input type="file" className="hidden" accept="image/*" onChange={handleUpload} />
       </label>
+      {uploadError && <p className="text-xs text-danger">{uploadError}</p>}
     </div>
   );
 }
