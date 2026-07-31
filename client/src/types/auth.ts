@@ -13,3 +13,36 @@ export interface LoginVariables {
     loginPassword: string;
   };
 }
+
+export interface ValidateTokenResult {
+  validateRegistrationToken: {
+    valid: boolean;
+    email: string | null;
+  } | null;
+}
+
+export interface ValidateTokenVariables {
+  token: string;
+}
+
+export interface RegisterResult {
+  register: {
+    success: boolean;
+    message: string | null;
+    token: string | null;
+    user: {
+      id: string;
+      userName: string;
+      role: string;
+      email: string;
+    } | null;
+  };
+}
+
+export interface RegisterVariables {
+  input: {
+    token: string;
+    registerName: string;
+    password: string;
+  };
+}

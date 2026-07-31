@@ -25,7 +25,6 @@ const authTypeDefs = `#graphql
   input CreateUserInput {
     token: String!
     registerName: String!
-    registerEmail: String!
     password: String!
   }
 
